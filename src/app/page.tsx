@@ -138,7 +138,7 @@ export default function Home() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
 
       {/* HEADER */}
-      <div className="mb-12 text-center relative z-10">
+      <div className="mb-12 mt-20 md:mt-0 text-center relative z-10">
         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4 tracking-tight">
           Intima Hub
         </h1>
