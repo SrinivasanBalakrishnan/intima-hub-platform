@@ -51,7 +51,7 @@ export default function Home() {
           </h1>
           
           <p className="text-gray-500 text-sm md:text-base mb-12 max-w-sm mx-auto leading-relaxed">
-            The decentralized ecosystem for sexual wellness. 
+            The Privacy-Native Operating System for Intimate Health. 
             <span className="block text-gray-600 mt-2 text-xs uppercase tracking-widest font-bold">No Email. No Names. Zero Trace.</span>
           </p>
 
