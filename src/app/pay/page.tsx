@@ -172,7 +172,7 @@ export default function PayPage() {
         <div className="mt-8 pt-6 border-t border-zinc-800 text-center pb-12">
           <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Institutional Infrastructure</p>
           <button 
-            onClick={() => alert("Intima API Sandbox: Enterprise Access Required.\n\nPlease contact institutional_sales@intima.io for API keys.")}
+            onClick={() => alert("Intima API Sandbox: Enterprise Access Required.\n\nPlease contact avellonintelligence@gmail.com for API keys.")}
             className="group flex items-center justify-center gap-2 mx-auto text-xs font-mono text-zinc-500 hover:text-purple-400 transition-all border border-transparent hover:border-purple-500/30 px-4 py-2 rounded-full hover:bg-purple-500/10"
           >
             <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
