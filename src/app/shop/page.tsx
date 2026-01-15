@@ -49,11 +49,30 @@ export default function ShopPage() {
   const [checkoutStep, setCheckoutStep] = useState("cart"); // 'cart' or 'invoice'
   const [orderId, setOrderId] = useState("");
 
-  // --- CART ACTIONS ---
+  // Track subscription state for each product (Default: True/Active)
+  // Logic: Record<ProductId, IsSubscribed>
+  const [subscriptions, setSubscriptions] = useState<Record<number, boolean>>({
+    1: true,
+    2: true,
+    3: true,
+    4: true
+  });
+
+  // --- ACTIONS ---
+
+  // Toggle Subscription
+  const toggleSubscription = (id: number) => {
+    setSubscriptions(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   const addToCart = (product: any) => {
-    setCart([...cart, product]);
+    // Add product to cart (we could pass the subscription status here if needed in backend)
+    setCart([...cart, { ...product, isSubscribed: subscriptions[product.id] }]);
     setIsCartOpen(true);
-    setCheckoutStep("cart"); // Reset to cart view if adding more items
+    setCheckoutStep("cart"); 
   };
 
   const removeFromCart = (indexToRemove: number) => {
@@ -61,14 +80,12 @@ export default function ShopPage() {
   };
 
   const handleCheckout = () => {
-    // Generate a random Order ID just before showing invoice
     setOrderId(`ORD-${Math.floor(Math.random() * 90000) + 10000}`);
     setCheckoutStep("invoice");
   };
 
   const closeDrawer = () => {
     setIsCartOpen(false);
-    // slight delay to reset view after drawer closes
     setTimeout(() => setCheckoutStep("cart"), 300);
   };
 
@@ -80,7 +97,7 @@ export default function ShopPage() {
 
   // Calculate Total Price
   const cartTotal = cart.reduce((total, item) => total + item.price, 0).toFixed(2);
-  const tax = (parseFloat(cartTotal) * 0.08).toFixed(2); // Mock 8% Tax
+  const tax = (parseFloat(cartTotal) * 0.08).toFixed(2); 
   const finalTotal = (parseFloat(cartTotal) + parseFloat(tax)).toFixed(2);
 
   return (
@@ -88,7 +105,6 @@ export default function ShopPage() {
       
       {/* 1. NAVIGATION BAR (Fixed Top) */}
       <div className="fixed top-0 left-0 w-full z-40 bg-black/90 backdrop-blur-md border-b border-zinc-800 p-4 flex justify-between items-center px-6 shadow-2xl">
-        {/* Back Button */}
         <button
           onClick={() => window.location.href = '/'}
           className="group border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-pink-500 transition-all flex items-center gap-2"
@@ -100,7 +116,6 @@ export default function ShopPage() {
           Intima-Shop
         </h1>
 
-        {/* Cart Icon */}
         <button 
           onClick={() => setIsCartOpen(true)}
           className="relative p-2 text-2xl hover:scale-110 transition-transform"
@@ -126,7 +141,7 @@ export default function ShopPage() {
       {/* 3. PRODUCT GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {PRODUCTS.map((product) => (
-          <div key={product.id} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-gray-600 transition-all group relative overflow-hidden">
+          <div key={product.id} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-gray-600 transition-all group relative overflow-hidden flex flex-col">
             
             {/* Background Icon Watermark */}
             <div className="absolute -right-6 -bottom-6 text-9xl opacity-5 grayscale group-hover:grayscale-0 transition-all pointer-events-none select-none">
@@ -142,15 +157,62 @@ export default function ShopPage() {
             <h3 className="text-xl font-bold text-white mb-1">{product.name}</h3>
             <p className="text-gray-400 text-sm mb-6 min-h-[40px]">{product.desc}</p>
             
-            {/* Price & Action */}
-            <div className="flex justify-between items-center mt-auto">
-              <span className={`text-2xl font-bold ${product.color}`}>${product.price}</span>
-              <button 
-                onClick={() => addToCart(product)}
-                className={`${product.btnColor} text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg active:scale-95`}
+            {/* Push content down so Price/Button are always at bottom */}
+            <div className="mt-auto">
+              
+              {/* ARR ENGINE: SUBSCRIPTION TOGGLE */}
+              {/* Feature: Recurring Revenue Model Signal */}
+              <div 
+                onClick={() => toggleSubscription(product.id)}
+                className={`mb-4 p-3 rounded-lg border flex items-center justify-between cursor-pointer transition-all group/sub ${
+                  subscriptions[product.id] 
+                    ? "bg-purple-900/20 border-purple-500/50 hover:bg-purple-900/40" 
+                    : "bg-zinc-800/30 border-zinc-700 hover:border-zinc-500"
+                }`}
               >
-                Add +
-              </button>
+                <div className="flex items-center gap-3">
+                  {/* Custom Radio Button */}
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
+                    subscriptions[product.id] ? "border-purple-400" : "border-gray-500"
+                  }`}>
+                    {subscriptions[product.id] && (
+                      <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]"></div>
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className={`text-xs font-bold transition-colors ${
+                      subscriptions[product.id] ? "text-white" : "text-gray-400"
+                    }`}>
+                      Subscribe & Save
+                    </span>
+                    <span className="text-[10px] text-gray-400">Delivered every 30 days</span>
+                  </div>
+                </div>
+                {subscriptions[product.id] && (
+                  <span className="text-[10px] font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded border border-green-400/20 animate-pulse">
+                    SAVE 15%
+                  </span>
+                )}
+              </div>
+
+              {/* Price & Action */}
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col">
+                  <span className={`text-2xl font-bold ${product.color}`}>
+                    ${subscriptions[product.id] ? (product.price * 0.85).toFixed(2) : product.price}
+                  </span>
+                  {subscriptions[product.id] && (
+                     <span className="text-[10px] text-gray-500 line-through">${product.price}</span>
+                  )}
+                </div>
+                
+                <button 
+                  onClick={() => addToCart(product)}
+                  className={`${product.btnColor} text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg active:scale-95`}
+                >
+                  {subscriptions[product.id] ? "Subscribe" : "Add +"}
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -192,7 +254,11 @@ export default function ShopPage() {
                       <div key={index} className="flex items-center gap-4 bg-black/40 p-3 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
                         <div className="text-3xl bg-zinc-800 w-12 h-12 flex items-center justify-center rounded-lg">{item.icon}</div>
                         <div className="flex-1">
-                          <p className="text-white font-medium text-sm">{item.name}</p>
+                          <p className="text-white font-medium text-sm">
+                            {item.name}
+                            {/* Visual indicator in cart for subscription items */}
+                            {item.isSubscribed && <span className="ml-2 text-[10px] text-purple-400 border border-purple-500/30 px-1 rounded">SUB</span>}
+                          </p>
                           <p className="text-gray-400 text-xs font-mono">${item.price}</p>
                         </div>
                         <button onClick={() => removeFromCart(index)} className="text-red-500 hover:text-red-300 text-xs hover:bg-red-900/20 px-3 py-1.5 rounded transition-colors">Remove</button>
@@ -247,7 +313,10 @@ export default function ShopPage() {
                   <div className="space-y-2 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar">
                     {cart.map((item, i) => (
                       <div key={i} className="flex justify-between">
-                        <span className="text-gray-300 truncate w-2/3">{item.name}</span>
+                        <span className="text-gray-300 truncate w-2/3">
+                          {item.name}
+                          {item.isSubscribed && <span className="text-purple-400 text-[10px] ml-1">*</span>}
+                        </span>
                         <span className="text-white">${item.price}</span>
                       </div>
                     ))}
