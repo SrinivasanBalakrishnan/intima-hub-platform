@@ -4,12 +4,128 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function Home() {
-  // State to control the Security Console Popup
+  // --- STATE: ONBOARDING GATE (NEW) ---
+  const [hasAccess, setHasAccess] = useState(false);
+  const [bootSequence, setBootSequence] = useState(0); // 0=Idle, 1=Processing, 2=Complete
+  const [anonId, setAnonId] = useState("");
+  
+  // --- STATE: HUB SECURITY CONSOLE (EXISTING) ---
   const [showSecurity, setShowSecurity] = useState(false);
 
+  // --- LOGIC: SIMULATE CRYPTOGRAPHIC HANDSHAKE ---
+  const runOnboarding = () => {
+    setBootSequence(1); // Start "Processing"
+    
+    // Step 1: Simulate fake delay for "Key Generation"
+    setTimeout(() => {
+      // Step 2: Generate random Anonymous ID
+      const randomId = `User_${Math.floor(Math.random() * 900) + 100}_X${Math.floor(Math.random() * 99)}`;
+      setAnonId(randomId);
+      setBootSequence(2); // Ready to Enter
+    }, 2500); // 2.5 seconds of "Privacy Theater"
+  };
+
+  const enterHub = () => {
+    setHasAccess(true); // Unlock the main dashboard
+  };
+
+  // ---------------------------------------------------------
+  // RENDER 1: THE ZERO-KNOWLEDGE SPLASH SCREEN (Locked State)
+  // ---------------------------------------------------------
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-black text-gray-100 font-mono flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in duration-500">
+        
+        {/* Background Grid Effect */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
+
+        <div className="relative z-10 max-w-lg w-full text-center">
+          
+          {/* Privacy Icon */}
+          <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)]">
+            <span className="text-4xl">🛡️</span>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600 mb-4 tracking-tighter">
+            INTIMA HUB
+          </h1>
+          
+          <p className="text-gray-500 text-sm md:text-base mb-12 max-w-sm mx-auto leading-relaxed">
+            The decentralized ecosystem for sexual wellness. 
+            <span className="block text-gray-600 mt-2 text-xs uppercase tracking-widest font-bold">No Email. No Names. Zero Trace.</span>
+          </p>
+
+          {/* ACTION AREA */}
+          <div className="min-h-[140px] flex flex-col items-center justify-center w-full">
+            
+            {/* STAGE 0: IDLE */}
+            {bootSequence === 0 && (
+              <button 
+                onClick={runOnboarding}
+                className="group relative px-8 py-4 bg-white text-black font-bold rounded-full transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-95"
+              >
+                Generate Anonymous ID
+                <div className="absolute inset-0 rounded-full border border-white opacity-0 group-hover:animate-ping"></div>
+              </button>
+            )}
+
+            {/* STAGE 1: PROCESSING (The Theater) */}
+            {bootSequence === 1 && (
+              <div className="space-y-4 w-full max-w-xs">
+                {/* Loading Bar */}
+                <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-800">
+                  <div className="bg-green-500 h-full w-2/3 animate-[shimmer_1s_infinite]"></div>
+                </div>
+                {/* Technical Jargon - SYNTAX ERROR FIXED HERE (Using &gt;) */}
+                <div className="text-xs text-green-500 font-mono flex flex-col gap-1 items-start pl-2">
+                  <span className="animate-pulse">&gt; Generating RSA-4096 Keys...</span>
+                  <span className="animate-pulse delay-75">&gt; Hashing IP Address...</span>
+                  <span className="animate-pulse delay-150">&gt; Establishing TLS Tunnel...</span>
+                </div>
+              </div>
+            )}
+
+            {/* STAGE 2: COMPLETE (Identity Assigned) */}
+            {bootSequence === 2 && (
+              <div className="animate-in fade-in zoom-in duration-300 w-full max-w-xs">
+                <div className="bg-zinc-900 border border-green-500/30 p-4 rounded-lg mb-4 flex items-center justify-between shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                  <span className="text-gray-500 text-xs uppercase font-bold">Your Identity</span>
+                  <span className="text-green-400 font-bold font-mono tracking-widest">{anonId}</span>
+                </div>
+                <button 
+                  onClick={enterHub}
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-lg font-bold border border-zinc-700 transition-all flex items-center justify-center gap-2 hover:border-green-500"
+                >
+                  Enter Secure Hub ➜
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* Footer Disclaimer */}
+        <div className="absolute bottom-6 text-[10px] text-zinc-600 text-center uppercase tracking-widest">
+          Session Data is Volatile • Wiped on Exit
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------
+  // RENDER 2: THE MAIN DASHBOARD (Your Original Code)
+  // ---------------------------------------------------------
   return (
-    <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       
+      {/* IDENTITY BADGE (NEW: Shows the ID generated in step 1) */}
+      <div className="absolute top-6 right-6 z-20">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/80 backdrop-blur border border-zinc-800 rounded-full shadow-lg">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-[10px] text-gray-400 font-mono tracking-wider">{anonId}</span>
+        </div>
+      </div>
+
       {/* BACKGROUND GLOW */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -22,7 +138,7 @@ export default function Home() {
           The Quantum-Secured Sexual Wellness Ecosystem
         </p>
         
-        {/* INTERACTIVE SECURITY BADGE (Now Clickable) */}
+        {/* INTERACTIVE SECURITY BADGE (Clickable) */}
         <button 
           onClick={() => setShowSecurity(true)}
           className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-green-900/10 border border-green-900/50 text-green-400 text-sm font-medium hover:bg-green-900/20 hover:scale-105 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500/50"
