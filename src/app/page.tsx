@@ -42,16 +42,15 @@ export default function Home() {
 
         <div className="relative z-10 max-w-lg w-full text-center">
           
-          {/* Privacy Icon (Fixed Path) */}
-          <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)] p-4 overflow-hidden relative">
+          {/* Privacy Icon (Fixed: Zoom to Fill) */}
+          <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)] overflow-hidden relative">
             <Image
-              src="/logo.jpg"   // <--- CHANGED TO SIMPLE NAME
+              src="/logo.jpg"
               alt="Intima Hub Logo"
               width={100}
               height={100}
-              className="object-contain w-full h-full drop-shadow-lg"
+              className="object-cover w-full h-full"
               priority
-              onError={(e) => console.error("Image load failed:", e)} // Debugging helper
             />
           </div>
 
