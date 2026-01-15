@@ -273,6 +273,17 @@ export default function Home() {
         </div>
       )}
 
+{/* SAFETY: PANIC BUTTON */}
+      <button
+        onClick={() => window.location.replace("https://www.weather.com")}
+        className="fixed bottom-6 right-6 z-50 bg-red-600 hover:bg-red-700 text-white font-bold p-4 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] flex items-center justify-center transition-all hover:scale-110 border border-red-500/50 group"
+        title="Quick Exit to Weather.com"
+      >
+        <span className="text-xl">✕</span>
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap text-sm font-mono ml-0 group-hover:ml-2">
+          QUICK EXIT
+        </span>
+      </button>
     </div>
   );
 }
