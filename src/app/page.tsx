@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image"; // <--- ADD THIS LINE
 
 export default function Home() {
   // --- STATE: ONBOARDING GATE (NEW) ---
@@ -41,9 +42,16 @@ export default function Home() {
 
         <div className="relative z-10 max-w-lg w-full text-center">
           
-          {/* Privacy Icon */}
-          <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)]">
-            <span className="text-4xl">🛡️</span>
+          {/* Privacy Icon (Custom Logo) */}
+          <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)] p-4 overflow-hidden relative">
+            <Image
+              src="/logo.svg.jpg"
+              alt="Intima Hub Logo"
+              width={100}
+              height={100}
+              className="object-contain w-full h-full drop-shadow-lg"
+              priority
+            />
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600 mb-4 tracking-tighter">
