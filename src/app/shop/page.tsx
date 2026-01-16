@@ -47,10 +47,9 @@ const PRODUCTS = [
 
 export default function ShopPage() {
   // --- 2. CONNECT TO GLOBAL STATE ---
-  // We use aliases (globalAdd, globalRemove) to distinguish from local handler functions
   const { cart, addToCart: globalAdd, removeFromCart: globalRemove, clearCart, addTransaction } = useIntima();
 
-  // --- LOCAL UI STATE (View Only) ---
+  // --- LOCAL UI STATE ---
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState("cart"); // 'cart' or 'invoice'
   const [orderId, setOrderId] = useState("");
@@ -99,7 +98,6 @@ export default function ShopPage() {
     const finalTotal = Number((subtotal + tax).toFixed(2));
 
     // 2. DEDUCT FROM GLOBAL WALLET (The "Real" Transaction)
-    // This updates the 'Pay' page immediately
     addTransaction("Intima Shop Purchase", finalTotal, 'debit');
 
     // 3. Generate Invoice UI
@@ -129,12 +127,13 @@ export default function ShopPage() {
       {/* 1. NAVIGATION BAR (Fixed Top) */}
       <div className="fixed top-0 left-0 w-full z-40 bg-black/90 backdrop-blur-md border-b border-zinc-800 p-4 flex justify-between items-center px-6 shadow-2xl">
         <Link
-        href="/"
-        className="fixed top-5 left-5 z-[9999] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-purple-500 transition-all shadow-lg flex items-center gap-2"
-      >
-        <span>←</span> Back to Hub
-      </Link>
+          href="/"
+          className="group border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-purple-500 transition-all flex items-center gap-2"
+        >
+          <span>←</span> Back to Hub
+        </Link>
 
+        {/* --- RESTORED HEADING (Desktop) --- */}
         <h1 className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent hidden md:block">
           Intima-Shop
         </h1>
@@ -183,7 +182,7 @@ export default function ShopPage() {
             {/* Push content down so Price/Button are always at bottom */}
             <div className="mt-auto">
               
-              {/* ARR ENGINE: SUBSCRIPTION TOGGLE */}
+              {/* SUBSCRIPTION TOGGLE (Your Feature) */}
               <div 
                 onClick={() => toggleSubscription(product.id)}
                 className={`mb-4 p-3 rounded-lg border flex items-center justify-between cursor-pointer transition-all group/sub ${
@@ -224,7 +223,7 @@ export default function ShopPage() {
                     ${subscriptions[product.id] ? (product.price * 0.85).toFixed(2) : product.price}
                   </span>
                   {subscriptions[product.id] && (
-                     <span className="text-[10px] text-gray-500 line-through">${product.price}</span>
+                      <span className="text-[10px] text-gray-500 line-through">${product.price}</span>
                   )}
                 </div>
                 
