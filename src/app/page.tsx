@@ -3,12 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; 
-// 1. IMPORT GLOBAL BRAIN
 import { useIntima } from "./context/IntimaContext";
 
 export default function Home() {
-  // 2. CONNECT TO GLOBAL STATE
-  // We grab 'logout' to enable the Exit feature
   const { hasSeenSplash, markSplashSeen, userId, logout } = useIntima();
   
   // --- LOCAL STATE FOR ANIMATION ---
@@ -16,8 +13,6 @@ export default function Home() {
   const [showSecurity, setShowSecurity] = useState(false);
 
   // --- ACTIONS ---
-  
-  // Simulates the cryptographic key generation visual
   const runOnboarding = () => {
     setBootSequence(1);
     setTimeout(() => {
@@ -25,31 +20,28 @@ export default function Home() {
     }, 2500); 
   };
 
-  // Marks the user as "Logged In" in the global memory
   const enterHub = () => {
     markSplashSeen(); 
   };
 
-  // Handles the "Exit" action
   const handleLogout = () => {
-    setBootSequence(0); // Reset local animation state
-    logout();           // Call global logout (Wipes session & redirects to Splash)
+    setBootSequence(0); 
+    logout();           
   };
 
   // ---------------------------------------------------------
-  // RENDER 1: SPLASH SCREEN (Locked State)
-  // Shows if user has NOT seen splash / just logged out
+  // RENDER 1: SPLASH SCREEN (Logo KEPT Here)
   // ---------------------------------------------------------
   if (!hasSeenSplash) {
     return (
       <div className="min-h-screen bg-black text-gray-100 font-mono flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in duration-500">
         
-        {/* Background Grid Effect */}
+        {/* Background Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
 
         <div className="relative z-10 max-w-lg w-full text-center">
           
-          {/* --- LOGO RESTORED (Splash Version) --- */}
+          {/* --- SPLASH LOGO (Active) --- */}
           <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)] overflow-hidden relative">
              <Image 
                src="/logo.jpg" 
@@ -125,20 +117,18 @@ export default function Home() {
   }
 
   // ---------------------------------------------------------
-  // RENDER 2: MAIN DASHBOARD (Hub View)
-  // Shows if user HAS seen splash (Logged In)
+  // RENDER 2: MAIN DASHBOARD (Logo Removed)
   // ---------------------------------------------------------
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       
-      {/* IDENTITY BADGE & EXIT BUTTON */}
+      {/* IDENTITY BADGE & EXIT */}
       <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/80 backdrop-blur border border-zinc-800 rounded-full shadow-lg">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[10px] text-gray-400 font-mono tracking-wider">{userId}</span>
         </div>
         
-        {/* --- EXIT / LOGOUT BUTTON (FIX ADDED) --- */}
         <button 
           onClick={handleLogout}
           className="text-[10px] text-red-500/70 hover:text-red-400 uppercase tracking-widest hover:underline transition-all cursor-pointer"
@@ -150,19 +140,9 @@ export default function Home() {
       {/* BACKGROUND GLOW */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-      {/* HEADER */}
+      {/* HEADER (No Logo) */}
       <div className="mb-12 mt-20 md:mt-0 text-center relative z-10 flex flex-col items-center">
         
-        {/* --- LOGO RESTORED (Header Version) --- */}
-        <div className="w-20 h-20 relative mb-4 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800 shadow-2xl shadow-purple-900/20 overflow-hidden">
-            <Image 
-               src="/logo.jpg" 
-               alt="Intima Hub Logo" 
-               fill
-               className="object-cover"
-             />
-        </div>
-
         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4 tracking-tight">
           Intima Hub
         </h1>
