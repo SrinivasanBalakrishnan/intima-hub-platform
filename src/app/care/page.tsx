@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 // --- MOCK DATABASE (Enhanced with Bio & Stats) ---
 const DOCTORS = [
@@ -96,13 +97,14 @@ export default function CarePage() {
     <div className="min-h-screen bg-black text-gray-100 font-sans relative p-6 pb-24">
       
       {/* 1. BACK BUTTON */}
-      <button
-        onClick={() => window.location.href = '/'}
+
+      <Link
+        href="/"
         className="fixed top-5 left-5 z-[40] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-green-500 transition-all shadow-lg flex items-center gap-2"
       >
         <span>←</span> Back to Hub
-      </button>
-
+      </Link>
+        
       {/* 2. HEADER */}
       <header className="mt-16 mb-8 text-center">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-teal-500 bg-clip-text text-transparent mb-2">

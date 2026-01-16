@@ -3,6 +3,7 @@
 import { useState } from "react";
 // 1. IMPORT THE GLOBAL BRAIN
 import { useIntima } from "../context/IntimaContext";
+import Link from "next/link";
 
 // --- MOCK PRODUCT DATABASE ---
 const PRODUCTS = [
@@ -127,12 +128,12 @@ export default function ShopPage() {
       
       {/* 1. NAVIGATION BAR (Fixed Top) */}
       <div className="fixed top-0 left-0 w-full z-40 bg-black/90 backdrop-blur-md border-b border-zinc-800 p-4 flex justify-between items-center px-6 shadow-2xl">
-        <button
-          onClick={() => window.location.href = '/'}
-          className="group border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-pink-500 transition-all flex items-center gap-2"
-        >
-          <span>←</span> Back to Hub
-        </button>
+        <Link
+        href="/"
+        className="fixed top-5 left-5 z-[9999] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-purple-500 transition-all shadow-lg flex items-center gap-2"
+      >
+        <span>←</span> Back to Hub
+      </Link>
 
         <h1 className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent hidden md:block">
           Intima-Shop
