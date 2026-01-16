@@ -1,38 +1,15 @@
 "use client";
 
 import { useState } from "react";
-
-// --- MOCK TRANSACTION DATA ---
-// Represents the initial state of the user's secure ledger
-const INITIAL_TRANSACTIONS = [
-  { 
-    id: "txn_3928472910", 
-    descriptor: "Intima-Shop Order", 
-    merchant: "Intima Shop Decentralized",
-    amount: -12.99, 
-    date: "Today, 10:30 AM", 
-    status: "Completed",
-    type: "spend",
-    icon: "🛒",
-    iconColor: "bg-green-900/30 text-green-400"
-  },
-  { 
-    id: "txn_88129381", 
-    descriptor: "Dr. Sharma Consult", 
-    merchant: "Intima Care Platform",
-    amount: -50.00, 
-    date: "Yesterday", 
-    status: "Completed",
-    type: "spend",
-    icon: "🩺",
-    iconColor: "bg-blue-900/30 text-blue-400"
-  }
-];
+// 1. IMPORT THE GLOBAL BRAIN (Critical Fix)
+import { useIntima } from "../context/IntimaContext";
 
 export default function PayPage() {
-  // --- STATE MANAGEMENT ---
-  const [balance, setBalance] = useState(2450.00);
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  // 2. CONNECT TO GLOBAL STATE
+  // Instead of local state, we pull live data from the context
+  const { balance, transactions, addTransaction } = useIntima();
+
+  // --- LOCAL UI STATE ---
   const [isMaskingActive, setIsMaskingActive] = useState(true);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -43,21 +20,13 @@ export default function PayPage() {
     
     // Simulate API Latency & Banking Handshake
     setTimeout(() => {
-      const newTxn = {
-        id: `txn_masked_${Math.floor(Math.random() * 10000)}`,
-        // If Masking is ON, show generic name. If OFF, show Intima Pay.
-        descriptor: isMaskingActive ? "Wallet Load (Masked)" : "Intima Pay Load",
-        merchant: isMaskingActive ? "IH Cloud Services LLC" : "Intima Pay Global",
-        amount: amount,
-        date: "Just Now",
-        status: "Settled",
-        type: "credit",
-        icon: "💳",
-        iconColor: "bg-purple-900/30 text-purple-400"
-      };
+      // Determine the descriptor based on privacy toggle
+      const merchantName = isMaskingActive ? "IH Cloud Services LLC" : "Intima Pay Global";
+      const descriptorText = isMaskingActive ? "Wallet Load (Masked)" : "Intima Pay Load";
 
-      setBalance(prev => prev + amount);
-      setTransactions([newTxn, ...transactions]); // Add to top of list
+      // EXECUTE GLOBAL TRANSACTION
+      addTransaction(descriptorText, amount, 'credit');
+
       setIsProcessing(false);
       setShowTopUpModal(false);
     }, 2000);
@@ -66,7 +35,7 @@ export default function PayPage() {
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans relative p-6 pb-20">
       
-      {/* 1. BACK BUTTON (Preserved from your original code) */}
+      {/* 1. BACK BUTTON */}
       <button
         onClick={() => window.location.href = '/'}
         className="fixed top-5 left-5 z-[9999] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-purple-500 transition-all shadow-lg flex items-center gap-2"
@@ -82,7 +51,7 @@ export default function PayPage() {
         <div className="flex flex-col gap-2 items-center">
           <p className="text-gray-400">Quantum-Encrypted Wallet.</p>
           
-          {/* API Key Badge (New Enterprise Feature) */}
+          {/* API Key Badge */}
           <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
@@ -112,7 +81,7 @@ export default function PayPage() {
           </button>
         </div>
 
-        {/* WALLET CARD (Enhanced) */}
+        {/* WALLET CARD */}
         <div className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl p-8 shadow-2xl border border-purple-700/50 mb-8 relative overflow-hidden group">
           {/* Holographic BG Effect */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
@@ -124,7 +93,7 @@ export default function PayPage() {
           </div>
           
           <h2 className="text-4xl font-bold text-white mb-6 font-mono tracking-tight">
-            {balance.toFixed(2)} <span className="text-lg opacity-60">INT</span>
+            ${balance.toFixed(2)} <span className="text-lg opacity-60">INT</span>
           </h2>
           
           <div className="flex gap-4">
@@ -150,15 +119,20 @@ export default function PayPage() {
           {transactions.map((tx) => (
             <div key={tx.id} className="bg-zinc-900/50 p-4 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-zinc-700 transition-colors">
               <div className="flex items-center gap-3">
-                <div className={`${tx.iconColor} p-2 rounded-lg text-lg`}>{tx.icon}</div>
+                {/* Dynamic Icon based on Transaction Type */}
+                <div className={`p-2 rounded-lg text-lg ${
+                  tx.type === 'credit' ? 'bg-purple-900/30 text-purple-400' : 'bg-red-900/30 text-red-400'
+                }`}>
+                  {tx.type === 'credit' ? '💳' : '🛒'}
+                </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-white text-sm font-medium">{tx.descriptor}</p>
-                    {tx.type === 'credit' && isMaskingActive && (
+                    <p className="text-white text-sm font-medium">{tx.merchant}</p>
+                    {tx.type === 'credit' && isMaskingActive && tx.merchant.includes("Cloud") && (
                       <span className="text-[9px] bg-zinc-800 text-gray-500 px-1 rounded border border-zinc-700">MASKED</span>
                     )}
                   </div>
-                  <p className="text-gray-500 text-xs">{tx.date} • {tx.merchant}</p>
+                  <p className="text-gray-500 text-xs">{tx.date} • {tx.status}</p>
                 </div>
               </div>
               <span className={`font-mono font-bold ${tx.type === 'credit' ? 'text-green-400' : 'text-red-400'}`}>
@@ -166,9 +140,13 @@ export default function PayPage() {
               </span>
             </div>
           ))}
+          
+          {transactions.length === 0 && (
+            <div className="text-center text-zinc-600 text-sm py-8">No transactions yet.</div>
+          )}
         </div>
 
-{/* --- B2B ENTERPRISE API SIGNAL --- */}
+        {/* --- B2B ENTERPRISE API SIGNAL --- */}
         <div className="mt-8 pt-6 border-t border-zinc-800 text-center pb-12">
           <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Institutional Infrastructure</p>
           <button 

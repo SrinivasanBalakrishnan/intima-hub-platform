@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+// 1. IMPORT THE GLOBAL BRAIN
+import { useIntima } from "../context/IntimaContext";
 
 // --- MOCK PRODUCT DATABASE ---
 const PRODUCTS = [
@@ -43,14 +45,16 @@ const PRODUCTS = [
 ];
 
 export default function ShopPage() {
-  // --- STATE MANAGEMENT ---
-  const [cart, setCart] = useState<any[]>([]);
+  // --- 2. CONNECT TO GLOBAL STATE ---
+  // We use aliases (globalAdd, globalRemove) to distinguish from local handler functions
+  const { cart, addToCart: globalAdd, removeFromCart: globalRemove, clearCart, addTransaction } = useIntima();
+
+  // --- LOCAL UI STATE (View Only) ---
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState("cart"); // 'cart' or 'invoice'
   const [orderId, setOrderId] = useState("");
 
   // Track subscription state for each product (Default: True/Active)
-  // Logic: Record<ProductId, IsSubscribed>
   const [subscriptions, setSubscriptions] = useState<Record<number, boolean>>({
     1: true,
     2: true,
@@ -60,7 +64,6 @@ export default function ShopPage() {
 
   // --- ACTIONS ---
 
-  // Toggle Subscription
   const toggleSubscription = (id: number) => {
     setSubscriptions(prev => ({
       ...prev,
@@ -68,18 +71,37 @@ export default function ShopPage() {
     }));
   };
 
-  const addToCart = (product: any) => {
-    // Add product to cart (we could pass the subscription status here if needed in backend)
-    setCart([...cart, { ...product, isSubscribed: subscriptions[product.id] }]);
+  // Wrapper to handle price calculation before sending to Global State
+  const handleAddToCart = (product: any) => {
+    const isSub = subscriptions[product.id];
+    
+    // Logic: Apply 15% discount if subscribed
+    const finalPrice = isSub 
+      ? Number((product.price * 0.85).toFixed(2)) 
+      : product.price;
+
+    // Add to Global Context
+    globalAdd({
+      ...product,
+      price: finalPrice, // Save the actual price they will pay
+      isSubscribed: isSub
+    });
+    
     setIsCartOpen(true);
     setCheckoutStep("cart"); 
   };
 
-  const removeFromCart = (indexToRemove: number) => {
-    setCart(cart.filter((_, index) => index !== indexToRemove));
-  };
-
   const handleCheckout = () => {
+    // 1. Calculate the Final Total again to be safe
+    const subtotal = cart.reduce((total, item) => total + item.price, 0);
+    const tax = subtotal * 0.08;
+    const finalTotal = Number((subtotal + tax).toFixed(2));
+
+    // 2. DEDUCT FROM GLOBAL WALLET (The "Real" Transaction)
+    // This updates the 'Pay' page immediately
+    addTransaction("Intima Shop Purchase", finalTotal, 'debit');
+
+    // 3. Generate Invoice UI
     setOrderId(`ORD-${Math.floor(Math.random() * 90000) + 10000}`);
     setCheckoutStep("invoice");
   };
@@ -90,12 +112,12 @@ export default function ShopPage() {
   };
 
   const resetOrder = () => {
-    setCart([]);
+    clearCart(); // Wipes Global Cart
     setCheckoutStep("cart");
     setIsCartOpen(false);
   };
 
-  // Calculate Total Price
+  // Calculate Total Price for Display
   const cartTotal = cart.reduce((total, item) => total + item.price, 0).toFixed(2);
   const tax = (parseFloat(cartTotal) * 0.08).toFixed(2); 
   const finalTotal = (parseFloat(cartTotal) + parseFloat(tax)).toFixed(2);
@@ -161,7 +183,6 @@ export default function ShopPage() {
             <div className="mt-auto">
               
               {/* ARR ENGINE: SUBSCRIPTION TOGGLE */}
-              {/* Feature: Recurring Revenue Model Signal */}
               <div 
                 onClick={() => toggleSubscription(product.id)}
                 className={`mb-4 p-3 rounded-lg border flex items-center justify-between cursor-pointer transition-all group/sub ${
@@ -207,7 +228,7 @@ export default function ShopPage() {
                 </div>
                 
                 <button 
-                  onClick={() => addToCart(product)}
+                  onClick={() => handleAddToCart(product)}
                   className={`${product.btnColor} text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg active:scale-95`}
                 >
                   {subscriptions[product.id] ? "Subscribe" : "Add +"}
@@ -256,12 +277,11 @@ export default function ShopPage() {
                         <div className="flex-1">
                           <p className="text-white font-medium text-sm">
                             {item.name}
-                            {/* Visual indicator in cart for subscription items */}
                             {item.isSubscribed && <span className="ml-2 text-[10px] text-purple-400 border border-purple-500/30 px-1 rounded">SUB</span>}
                           </p>
                           <p className="text-gray-400 text-xs font-mono">${item.price}</p>
                         </div>
-                        <button onClick={() => removeFromCart(index)} className="text-red-500 hover:text-red-300 text-xs hover:bg-red-900/20 px-3 py-1.5 rounded transition-colors">Remove</button>
+                        <button onClick={() => globalRemove(index)} className="text-red-500 hover:text-red-300 text-xs hover:bg-red-900/20 px-3 py-1.5 rounded transition-colors">Remove</button>
                       </div>
                     ))
                   )}
