@@ -26,40 +26,32 @@ export default function Home() {
   const [showSecurity, setShowSecurity] = useState(false);
 
   // --- EFFECT: Handle Login State Sync ---
-  // If the Context says we are logged in (from persistence), go to Hub immediately.
   useEffect(() => {
     if (isAuthenticated) {
       setView('hub');
     } else {
-      // If we logout or start fresh, go to intro
       if (view === 'hub') setView('intro');
     }
   }, [isAuthenticated]);
 
   // --- ACTIONS ---
 
-  // A. GENERATE NEW IDENTITY FLOW
   const startGeneration = () => {
     setView('processing');
-    
-    // 1. Generate the secret keys immediately
     const secret = generateMnemonic();
     setTempMnemonic(secret);
 
-    // 2. Play the "Privacy Theater" animation for 2.5s (Retaining existing feature)
     setTimeout(() => {
-      setView('reveal'); // Move to Step 3 (The Vault Reveal)
+      setView('reveal');
     }, 2500);
   };
 
-  // B. CONFIRM AND ENTER HUB
   const confirmIdentity = () => {
     if (isCopied) {
-      login(tempMnemonic); // Logs in with the generated phrase
+      login(tempMnemonic);
     }
   };
 
-  // C. RESTORE SESSION FLOW
   const handleRestore = () => {
     const success = login(restoreInput.toLowerCase().trim());
     if (!success) {
@@ -67,7 +59,6 @@ export default function Home() {
     }
   };
 
-  // D. LOGOUT
   const handleLogout = () => {
     logout();
     setView('intro');
@@ -101,7 +92,7 @@ export default function Home() {
         {/* BACKGROUND GLOW */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-        {/* HEADER (No Logo, Clean Look) */}
+        {/* HEADER */}
         <div className="mb-12 mt-20 md:mt-0 text-center relative z-10 flex flex-col items-center">
           <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4 tracking-tight">
             Intima Hub
@@ -246,7 +237,7 @@ export default function Home() {
 
       <div className="relative z-10 max-w-lg w-full text-center">
         
-        {/* LOGO (Always Visible in Onboarding) */}
+        {/* LOGO */}
         <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)] overflow-hidden relative">
             <Image 
                src="/logo.jpg" 
@@ -262,13 +253,14 @@ export default function Home() {
           INTIMA HUB
         </h1>
         
-        <p className="text-gray-500 text-sm md:text-base mb-12 max-w-sm mx-auto leading-relaxed">
+        {/* REVISED MARGIN: Tightened for professional layout */}
+        <p className="text-gray-500 text-sm md:text-base mb-8 max-w-sm mx-auto leading-relaxed">
           The Privacy-Native Operating System for Intimate Health. 
           <span className="block text-gray-600 mt-2 text-xs uppercase tracking-widest font-bold">No Email. No Names. Zero Trace.</span>
         </p>
 
-        {/* DYNAMIC CONTENT AREA */}
-        <div className="min-h-[200px] flex flex-col items-center justify-center w-full">
+        {/* ACTION AREA: Spacing optimized for flow */}
+        <div className="flex flex-col items-center justify-center w-full">
           
           {/* STATE 1: INTRO (Choice) */}
           {view === 'intro' && (
@@ -302,7 +294,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* STATE 3: REVEAL (The New Vault Screen) */}
+          {/* STATE 3: REVEAL (Vault Screen) */}
           {view === 'reveal' && (
             <div className="animate-in fade-in zoom-in duration-300 w-full">
               <div className="bg-zinc-900 border border-yellow-500/30 p-6 rounded-xl mb-4 text-left relative overflow-hidden">

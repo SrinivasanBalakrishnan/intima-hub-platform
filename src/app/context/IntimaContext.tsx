@@ -73,17 +73,39 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
   // Animation State
   const [hasSeenSplash, setHasSeenSplash] = useState(false);
 
-  // --- 2. RESTORE / LOGIN LOGIC (The Vault Opener) ---
+  // --- 2. SESSION RECOVERY (NEW: Fix for "Back Button" Bug) ---
+  useEffect(() => {
+    // A. Check if a session is active in this browser tab (Session Storage)
+    const activeSession = sessionStorage.getItem('intima_active_session');
+    
+    // If we have an active session, auto-login silently
+    if (activeSession) {
+       login(activeSession);
+    }
+    
+    // B. Check global splash setting (Local Storage)
+    // This handles the "Have they seen the intro?" logic separately
+    if (typeof window !== 'undefined') {
+      const savedSplash = localStorage.getItem('intima_global_splash');
+      if (savedSplash === 'true') setHasSeenSplash(true);
+    }
+  }, []);
+
+  // --- 3. RESTORE / LOGIN LOGIC (The Vault Opener) ---
   const login = (mnemonic: string) => {
     if (!mnemonic) return false;
     
     // Create a unique storage key based on the secret phrase
-    // This isolates User A's data from User B's data on the same device
     const derivedKey = `intima_vault_${mnemonic.trim().replace(/\s+/g, '_')}`;
     const derivedId = generateIdFromMnemonic(mnemonic);
 
     setVaultKey(derivedKey);
     setUserId(derivedId);
+
+    // NEW: Save active session to sessionStorage 
+    // This allows page refreshes/navigation without logging out, 
+    // but wipes the session when the tab/browser is closed.
+    sessionStorage.setItem('intima_active_session', mnemonic);
 
     // Attempt to load data from the vault
     if (typeof window !== 'undefined') {
@@ -96,7 +118,6 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
           setBalance(parsed.balance);
           setCart(parsed.cart);
           setTransactions(parsed.transactions);
-          // We don't overwrite userId here, we use the one derived from mnemonic to ensure consistency
         } catch (e) {
           console.error("Vault corruption detected", e);
         }
@@ -109,12 +130,11 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     }
 
     setIsAuthenticated(true);
-    // Mark splash as seen so they don't get stuck in loop if we redirect
     setHasSeenSplash(true); 
     return true;
   };
 
-  // --- 3. PERSISTENCE (Auto-Save to Vault) ---
+  // --- 4. PERSISTENCE (Auto-Save to Vault) ---
   useEffect(() => {
     if (isAuthenticated && vaultKey && typeof window !== 'undefined') {
       const vaultData = {
@@ -128,16 +148,7 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     }
   }, [balance, cart, transactions, isAuthenticated, vaultKey]);
 
-  // --- 4. LOAD GLOBAL SETTINGS (Splash Screen Memory) ---
-  // This is separate from the Vault. It just remembers "Has this browser visited before?"
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedSplash = localStorage.getItem('intima_global_splash');
-      if (savedSplash === 'true') setHasSeenSplash(true);
-    }
-  }, []);
-
-  // Save Splash State globally
+  // Save Splash State globally (Separate from Vault)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('intima_global_splash', hasSeenSplash.toString());
@@ -194,10 +205,13 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     setBalance(0);
     setTransactions([]);
     
-    // 3. Reset Splash so they see the intro again
+    // 3. Reset Splash and Global Storage
     setHasSeenSplash(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem('intima_global_splash', 'false');
+      
+      // NEW: Clear the Session Token so they don't auto-login on refresh
+      sessionStorage.removeItem('intima_active_session');
     }
     
     // NOTE: We do NOT delete the localStorage vault item. 
