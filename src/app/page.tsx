@@ -1,16 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import Image from "next/image"; // <--- ADD THIS LINE
+import Link from "next/link";
+import Image from "next/image";
+// 1. IMPORT GLOBAL BRAIN
+import { useIntima } from "./context/IntimaContext";
 
 export default function Home() {
-  // --- STATE: ONBOARDING GATE (NEW) ---
-  const [hasAccess, setHasAccess] = useState(false);
-  const [bootSequence, setBootSequence] = useState(0); // 0=Idle, 1=Processing, 2=Complete
-  const [anonId, setAnonId] = useState("");
+  // 2. CONNECT TO GLOBAL STATE
+  // hasSeenSplash: Tells us if we should show the intro or the hub
+  // markSplashSeen: The function to call when user clicks "Enter"
+  // userId: The persistent ID from the context
+  const { hasSeenSplash, markSplashSeen, userId } = useIntima();
   
-  // --- STATE: HUB SECURITY CONSOLE (EXISTING) ---
+  // --- LOCAL STATE FOR ANIMATION ONLY ---
+  const [bootSequence, setBootSequence] = useState(0); // 0=Idle, 1=Processing, 2=Complete
+  
+  // --- STATE: HUB SECURITY CONSOLE ---
   const [showSecurity, setShowSecurity] = useState(false);
 
   // --- LOGIC: SIMULATE CRYPTOGRAPHIC HANDSHAKE ---
@@ -19,21 +25,23 @@ export default function Home() {
     
     // Step 1: Simulate fake delay for "Key Generation"
     setTimeout(() => {
-      // Step 2: Generate random Anonymous ID
-      const randomId = `User_${Math.floor(Math.random() * 900) + 100}_X${Math.floor(Math.random() * 99)}`;
-      setAnonId(randomId);
+      // We don't generate a new ID here; we reveal the one from Context
       setBootSequence(2); // Ready to Enter
-    }, 2500); // 2.5 seconds of "Privacy Theater"
+    }, 2500); 
   };
 
   const enterHub = () => {
-    setHasAccess(true); // Unlock the main dashboard
+    // CRITICAL FIX: Update Global Memory
+    markSplashSeen(); 
+    // This triggers a re-render. Since hasSeenSplash is now true, 
+    // it will skip the 'if' block below and show the Hub.
   };
 
   // ---------------------------------------------------------
   // RENDER 1: THE ZERO-KNOWLEDGE SPLASH SCREEN (Locked State)
   // ---------------------------------------------------------
-  if (!hasAccess) {
+  // Only show this if the Global Brain says we haven't seen it yet
+  if (!hasSeenSplash) {
     return (
       <div className="min-h-screen bg-black text-gray-100 font-mono flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in duration-500">
         
@@ -42,16 +50,10 @@ export default function Home() {
 
         <div className="relative z-10 max-w-lg w-full text-center">
           
-          {/* Privacy Icon (Fixed: Zoom to Fill) */}
+          {/* Privacy Icon */}
           <div className="w-24 h-24 bg-zinc-900 border border-zinc-700 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.1)] overflow-hidden relative">
-            <Image
-              src="/logo.jpg"
-              alt="Intima Hub Logo"
-              width={100}
-              height={100}
-              className="object-cover w-full h-full"
-              priority
-            />
+             {/* Fallback to emoji if image fails, or use your logo */}
+             <div className="text-4xl">🛡️</div>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600 mb-4 tracking-tighter">
@@ -84,7 +86,7 @@ export default function Home() {
                 <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-800">
                   <div className="bg-green-500 h-full w-2/3 animate-[shimmer_1s_infinite]"></div>
                 </div>
-                {/* Technical Jargon - SYNTAX ERROR FIXED HERE (Using &gt;) */}
+                {/* Technical Jargon */}
                 <div className="text-xs text-green-500 font-mono flex flex-col gap-1 items-start pl-2">
                   <span className="animate-pulse">&gt; Generating RSA-4096 Keys...</span>
                   <span className="animate-pulse delay-75">&gt; Hashing IP Address...</span>
@@ -98,7 +100,7 @@ export default function Home() {
               <div className="animate-in fade-in zoom-in duration-300 w-full max-w-xs">
                 <div className="bg-zinc-900 border border-green-500/30 p-4 rounded-lg mb-4 flex items-center justify-between shadow-[0_0_20px_rgba(34,197,94,0.1)]">
                   <span className="text-gray-500 text-xs uppercase font-bold">Your Identity</span>
-                  <span className="text-green-400 font-bold font-mono tracking-widest">{anonId}</span>
+                  <span className="text-green-400 font-bold font-mono tracking-widest">{userId}</span>
                 </div>
                 <button 
                   onClick={enterHub}
@@ -121,16 +123,16 @@ export default function Home() {
   }
 
   // ---------------------------------------------------------
-  // RENDER 2: THE MAIN DASHBOARD (Your Original Code)
+  // RENDER 2: THE MAIN DASHBOARD (Hub View)
   // ---------------------------------------------------------
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       
-      {/* IDENTITY BADGE (NEW: Shows the ID generated in step 1) */}
+      {/* IDENTITY BADGE (Using Global UserID) */}
       <div className="absolute top-6 right-6 z-20">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/80 backdrop-blur border border-zinc-800 rounded-full shadow-lg">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-[10px] text-gray-400 font-mono tracking-wider">{anonId}</span>
+          <span className="text-[10px] text-gray-400 font-mono tracking-wider">{userId}</span>
         </div>
       </div>
 
@@ -146,7 +148,7 @@ export default function Home() {
           The Quantum-Secured Sexual Wellness Ecosystem
         </p>
         
-        {/* INTERACTIVE SECURITY BADGE (Clickable) */}
+        {/* INTERACTIVE SECURITY BADGE */}
         <button 
           onClick={() => setShowSecurity(true)}
           className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-green-900/10 border border-green-900/50 text-green-400 text-sm font-medium hover:bg-green-900/20 hover:scale-105 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500/50"
@@ -160,7 +162,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* THE 4 BOXES GRID (All Active) */}
+      {/* THE 4 BOXES GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl w-full relative z-10">
         
         {/* BOX 1: AI BOT */}
@@ -209,7 +211,7 @@ export default function Home() {
         © 2026 Intima Hub Platform. All rights reserved.
       </footer>
 
-      {/* --- NEW: SECURITY CONSOLE OVERLAY (Visible only when clicked) --- */}
+      {/* --- SECURITY CONSOLE OVERLAY --- */}
       {showSecurity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-black border border-green-500/30 rounded-lg max-w-lg w-full p-6 shadow-[0_0_50px_rgba(34,197,94,0.15)] font-mono relative">
@@ -273,7 +275,7 @@ export default function Home() {
         </div>
       )}
 
-{/* SAFETY: PANIC BUTTON */}
+      {/* SAFETY: PANIC BUTTON */}
       <button
         onClick={() => window.location.replace("https://www.weather.com")}
         className="fixed bottom-6 right-6 z-50 bg-red-600 hover:bg-red-700 text-white font-bold p-4 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] flex items-center justify-center transition-all hover:scale-110 border border-red-500/50 group"
