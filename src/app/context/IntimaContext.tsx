@@ -37,9 +37,10 @@ type IntimaContextType = {
   userId: string;
   generateIdentity: () => void;
 
-  // App State (NEW FEATURE: Splash Screen Memory)
+  // App State
   hasSeenSplash: boolean;
   markSplashSeen: () => void;
+  logout: () => void; // <--- NEW: Feature Added
 };
 
 // --- INITIAL MOCK DATA ---
@@ -59,18 +60,17 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState("User_188_X26");
   const [isAnonymous, setIsAnonymous] = useState(true);
   
-  // NEW: Track if Splash Screen was seen
+  // Track if Splash Screen was seen
   const [hasSeenSplash, setHasSeenSplash] = useState(false);
 
   // 2. LOAD FROM LOCAL STORAGE (The "Memory" Fix)
   useEffect(() => {
-    // Check if running in browser to avoid SSR errors
     if (typeof window !== 'undefined') {
       const savedBalance = localStorage.getItem('intima_balance');
       const savedCart = localStorage.getItem('intima_cart');
       const savedTx = localStorage.getItem('intima_tx');
       const savedUser = localStorage.getItem('intima_user');
-      const savedSplash = localStorage.getItem('intima_splash'); // Load splash state
+      const savedSplash = localStorage.getItem('intima_splash');
 
       if (savedBalance) setBalance(parseFloat(savedBalance));
       if (savedCart) setCart(JSON.parse(savedCart));
@@ -87,7 +87,7 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('intima_cart', JSON.stringify(cart));
       localStorage.setItem('intima_tx', JSON.stringify(transactions));
       localStorage.setItem('intima_user', userId);
-      localStorage.setItem('intima_splash', hasSeenSplash.toString()); // Save splash state
+      localStorage.setItem('intima_splash', hasSeenSplash.toString());
     }
   }, [balance, cart, transactions, userId, hasSeenSplash]);
 
@@ -133,6 +133,15 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     setHasSeenSplash(true);
   };
 
+  // --- NEW FEATURE: LOGOUT / EXIT ---
+  const logout = () => {
+    setHasSeenSplash(false); // Reset splash state (Forces intro on next load)
+    setCart([]);             // Clear session cart
+    generateIdentity();      // Generate fresh anonymous ID
+    // Note: We keep balance/transactions for demo continuity, 
+    // but in a real app, you might clear those too.
+  };
+
   return (
     <IntimaContext.Provider value={{
       balance,
@@ -145,8 +154,9 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
       isAnonymous,
       userId,
       generateIdentity,
-      hasSeenSplash,     // Exported
-      markSplashSeen     // Exported
+      hasSeenSplash,
+      markSplashSeen,
+      logout // <--- Exported
     }}>
       {children}
     </IntimaContext.Provider>
