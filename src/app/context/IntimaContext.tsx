@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// IMPORT SECURITY UTILS (Ensure src/utils/security.ts exists as approved)
+import { generateIdFromMnemonic } from '../utils/security';
 
 // --- TYPES ---
 export type Product = {
@@ -33,14 +35,17 @@ type IntimaContextType = {
   clearCart: () => void;
   
   // User State
-  isAnonymous: boolean;
   userId: string;
-  generateIdentity: () => void;
 
-  // App State
+  // App State (Animation)
   hasSeenSplash: boolean;
   markSplashSeen: () => void;
-  logout: () => void; // <--- NEW: Feature Added
+
+  // AUTH / VAULT STATE (NEW ENTERPRISE FEATURES)
+  isAuthenticated: boolean;
+  vaultKey: string | null;
+  login: (mnemonic: string) => boolean; // The Restore Function
+  logout: () => void;                   // The Exit Function
 };
 
 // --- INITIAL MOCK DATA ---
@@ -53,43 +58,92 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
 const IntimaContext = createContext<IntimaContextType | undefined>(undefined);
 
 export function IntimaProvider({ children }: { children: ReactNode }) {
-  // 1. STATE DEFINITIONS
+  // --- 1. STATE DEFINITIONS ---
+  
+  // Auth & Vault State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [vaultKey, setVaultKey] = useState<string | null>(null);
+  
+  // Core App Data
   const [balance, setBalance] = useState(1240.50);
   const [cart, setCart] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
-  const [userId, setUserId] = useState("User_188_X26");
-  const [isAnonymous, setIsAnonymous] = useState(true);
+  const [userId, setUserId] = useState("Guest_User");
   
-  // Track if Splash Screen was seen
+  // Animation State
   const [hasSeenSplash, setHasSeenSplash] = useState(false);
 
-  // 2. LOAD FROM LOCAL STORAGE (The "Memory" Fix)
+  // --- 2. RESTORE / LOGIN LOGIC (The Vault Opener) ---
+  const login = (mnemonic: string) => {
+    if (!mnemonic) return false;
+    
+    // Create a unique storage key based on the secret phrase
+    // This isolates User A's data from User B's data on the same device
+    const derivedKey = `intima_vault_${mnemonic.trim().replace(/\s+/g, '_')}`;
+    const derivedId = generateIdFromMnemonic(mnemonic);
+
+    setVaultKey(derivedKey);
+    setUserId(derivedId);
+
+    // Attempt to load data from the vault
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem(derivedKey);
+      
+      if (savedData) {
+        // SCENARIO: RETURNING USER (Restore Balance)
+        try {
+          const parsed = JSON.parse(savedData);
+          setBalance(parsed.balance);
+          setCart(parsed.cart);
+          setTransactions(parsed.transactions);
+          // We don't overwrite userId here, we use the one derived from mnemonic to ensure consistency
+        } catch (e) {
+          console.error("Vault corruption detected", e);
+        }
+      } else {
+        // SCENARIO: NEW IDENTITY (Fresh Wallet)
+        setBalance(1240.50); // Starting Bonus
+        setCart([]);
+        setTransactions(INITIAL_TRANSACTIONS);
+      }
+    }
+
+    setIsAuthenticated(true);
+    // Mark splash as seen so they don't get stuck in loop if we redirect
+    setHasSeenSplash(true); 
+    return true;
+  };
+
+  // --- 3. PERSISTENCE (Auto-Save to Vault) ---
+  useEffect(() => {
+    if (isAuthenticated && vaultKey && typeof window !== 'undefined') {
+      const vaultData = {
+        balance,
+        cart,
+        transactions,
+        lastActive: new Date().toISOString()
+      };
+      // Save to the SPECIFIC vault key
+      localStorage.setItem(vaultKey, JSON.stringify(vaultData));
+    }
+  }, [balance, cart, transactions, isAuthenticated, vaultKey]);
+
+  // --- 4. LOAD GLOBAL SETTINGS (Splash Screen Memory) ---
+  // This is separate from the Vault. It just remembers "Has this browser visited before?"
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedBalance = localStorage.getItem('intima_balance');
-      const savedCart = localStorage.getItem('intima_cart');
-      const savedTx = localStorage.getItem('intima_tx');
-      const savedUser = localStorage.getItem('intima_user');
-      const savedSplash = localStorage.getItem('intima_splash');
-
-      if (savedBalance) setBalance(parseFloat(savedBalance));
-      if (savedCart) setCart(JSON.parse(savedCart));
-      if (savedTx) setTransactions(JSON.parse(savedTx));
-      if (savedUser) setUserId(savedUser);
+      const savedSplash = localStorage.getItem('intima_global_splash');
       if (savedSplash === 'true') setHasSeenSplash(true);
     }
   }, []);
 
-  // 3. SAVE TO LOCAL STORAGE (Persistence)
+  // Save Splash State globally
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('intima_balance', balance.toString());
-      localStorage.setItem('intima_cart', JSON.stringify(cart));
-      localStorage.setItem('intima_tx', JSON.stringify(transactions));
-      localStorage.setItem('intima_user', userId);
-      localStorage.setItem('intima_splash', hasSeenSplash.toString());
+      localStorage.setItem('intima_global_splash', hasSeenSplash.toString());
     }
-  }, [balance, cart, transactions, userId, hasSeenSplash]);
+  }, [hasSeenSplash]);
+
 
   // --- ACTIONS ---
 
@@ -124,22 +178,30 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const generateIdentity = () => {
-    const newId = `User_${Math.floor(Math.random() * 999)}_X${Math.floor(Math.random() * 99)}`;
-    setUserId(newId);
-  };
-
   const markSplashSeen = () => {
     setHasSeenSplash(true);
   };
 
-  // --- NEW FEATURE: LOGOUT / EXIT ---
+  // --- LOGOUT / EXIT ---
   const logout = () => {
-    setHasSeenSplash(false); // Reset splash state (Forces intro on next load)
-    setCart([]);             // Clear session cart
-    generateIdentity();      // Generate fresh anonymous ID
-    // Note: We keep balance/transactions for demo continuity, 
-    // but in a real app, you might clear those too.
+    // 1. Clear Active Session State
+    setIsAuthenticated(false);
+    setVaultKey(null);
+    setUserId("Guest");
+    
+    // 2. Clear Visual Data (Security Wipe)
+    setCart([]); 
+    setBalance(0);
+    setTransactions([]);
+    
+    // 3. Reset Splash so they see the intro again
+    setHasSeenSplash(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('intima_global_splash', 'false');
+    }
+    
+    // NOTE: We do NOT delete the localStorage vault item. 
+    // That persists so the user can "Restore" later.
   };
 
   return (
@@ -151,12 +213,17 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
       addToCart,
       removeFromCart,
       clearCart,
-      isAnonymous,
       userId,
-      generateIdentity,
+      
+      // Animation State
       hasSeenSplash,
       markSplashSeen,
-      logout // <--- Exported
+      
+      // Auth State
+      isAuthenticated,
+      vaultKey,
+      login,
+      logout
     }}>
       {children}
     </IntimaContext.Provider>
