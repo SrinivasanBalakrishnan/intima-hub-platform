@@ -117,9 +117,10 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
         const genesisBalance = 499.00;
         
         // Create the Genesis Transaction Record
+        // FIX: Renamed to "Intima Welcome Bonus" per request
         const genesisTx: Transaction = {
           id: 'GENESIS-001',
-          merchant: 'Intima Protocol Airdrop',
+          merchant: 'Intima Welcome Bonus',
           amount: 499.00,
           date: new Date().toLocaleDateString(),
           type: 'credit',

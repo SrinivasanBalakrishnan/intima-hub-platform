@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image"; // Added for Logo integration
+import Image from "next/image"; 
 import { useIntima } from "../context/IntimaContext";
 
 export default function PayPage() {
@@ -21,13 +21,16 @@ export default function PayPage() {
     
     setIsProcessing(true);
     
+    // FIX: Apply Exchange Rate ($1 = 100 INT)
+    const finalCreditAmount = selectedAmount * 100;
+    
     // Simulate Banking Handshake & Latency
     setTimeout(() => {
       // Determine descriptor based on privacy toggle
       const merchantName = isMaskingActive ? "IH Cloud Services LLC" : "Intima Pay Global";
       
       // EXECUTE GLOBAL TRANSACTION
-      addTransaction(merchantName, selectedAmount, 'credit');
+      addTransaction(merchantName, finalCreditAmount, 'credit');
 
       // Reset State
       setIsProcessing(false);
@@ -53,7 +56,7 @@ export default function PayPage() {
           <span>←</span> Back to Hub
         </Link>
         
-        {/* API STATUS BADGE (RESTORED) */}
+        {/* API STATUS BADGE */}
         <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-sm shadow-sm">
           <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
           <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
@@ -90,7 +93,6 @@ export default function PayPage() {
         </div>
 
         {/* 2. THE GLASS VAULT CARD (ENTERPRISE UPGRADE) */}
-        {/* Added: True Glassmorphism & Neon Glow */}
         <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-[0_0_40px_rgba(168,85,247,0.15)] border border-white/10">
           
           {/* Glass Effect Layers */}
@@ -108,7 +110,7 @@ export default function PayPage() {
                 </div>
              </div>
              
-             {/* LOGO SWAP (Restored from Emoji to Image) */}
+             {/* LOGO */}
              <div className="w-14 h-14 rounded-full border border-white/20 bg-black/20 flex items-center justify-center backdrop-blur-md overflow-hidden shadow-inner">
                <Image 
                  src="/logo.jpg" 
@@ -176,7 +178,7 @@ export default function PayPage() {
           </div>
         </div>
 
-        {/* 4. INSTITUTIONAL FOOTER (RESTORED EXACTLY) */}
+        {/* 4. INSTITUTIONAL FOOTER */}
         <div className="mt-8 pt-6 border-t border-zinc-800/50 text-center pb-12">
            <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">
              Institutional Infrastructure
@@ -231,15 +233,16 @@ export default function PayPage() {
                ))}
              </div>
 
-             {/* Summary */}
+             {/* FIX: Summary reflects x100 conversion */}
              {selectedAmount && (
                <div className="bg-black/50 p-4 rounded-xl mb-6 flex justify-between items-center border border-zinc-800 animate-in slide-in-from-top-2">
                  <span className="text-gray-400 text-sm">You Receive:</span>
-                 <span className="text-purple-400 font-mono font-bold text-xl">{selectedAmount}.00 INT</span>
+                 <span className="text-purple-400 font-mono font-bold text-xl">
+                   {(selectedAmount * 100).toFixed(2)} INT
+                 </span>
                </div>
              )}
 
-             {/* Action */}
              <button 
                onClick={executeTopUp}
                disabled={!selectedAmount || isProcessing}
@@ -255,7 +258,6 @@ export default function PayPage() {
                )}
              </button>
              
-             {/* Security Footer */}
              <div className="mt-6 flex items-center justify-center gap-2 text-[10px] text-gray-500 uppercase tracking-widest">
                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                256-Bit SSL Encrypted
