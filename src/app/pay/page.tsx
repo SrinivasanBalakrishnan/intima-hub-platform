@@ -92,45 +92,47 @@ export default function PayPage() {
           </button>
         </div>
 
-        {/* 2. THE GLASS VAULT CARD (ENTERPRISE UPGRADE) */}
-        <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-[0_0_40px_rgba(168,85,247,0.15)] border border-white/10">
+        {/* 2. THE GLASS VAULT CARD (ULTRA-MODERN UPGRADE) */}
+        {/* UPGRADE: Replaced dark bg with Vibrant Indigo Gradient */}
+        <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-[0_0_50px_rgba(139,92,246,0.25)] border border-white/20">
           
-          {/* Glass Effect Layers */}
-          <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-2xl z-0"></div>
-          {/* Subtle sheen layer */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50 z-0 pointer-events-none"></div>
+          {/* VIBRANT GRADIENT LAYER */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/80 via-purple-800/60 to-violet-600/40 backdrop-blur-2xl z-0"></div>
+          
+          {/* SHEEN LAYER */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/10 opacity-60 z-0 pointer-events-none"></div>
           
           {/* Card Content */}
           <div className="relative z-10 flex justify-between items-start">
              <div>
-                <span className="block text-gray-400 text-xs font-mono uppercase tracking-widest mb-1">Available Liquidity</span>
-                <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2 text-shadow-sm">
+                <span className="block text-purple-100/80 text-xs font-mono uppercase tracking-widest mb-1">Available Liquidity</span>
+                <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2 drop-shadow-lg">
                   {balance.toFixed(2)} 
-                  <span className="text-xl text-purple-400 font-normal">INT</span>
+                  <span className="text-xl text-purple-200 font-normal">INT</span>
                 </div>
              </div>
              
              {/* LOGO */}
-             <div className="w-14 h-14 rounded-full border border-white/20 bg-black/20 flex items-center justify-center backdrop-blur-md overflow-hidden shadow-inner">
+             <div className="w-14 h-14 rounded-full border border-white/30 bg-white/10 flex items-center justify-center backdrop-blur-md overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                <Image 
                  src="/logo.jpg" 
                  alt="Intima Logo" 
                  width={56} 
                  height={56} 
-                 className="object-cover w-full h-full opacity-90"
+                 className="object-cover w-full h-full opacity-95"
                />
              </div>
           </div>
 
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
-             <div className="font-mono text-gray-500 text-xs tracking-widest uppercase">
-               User_ID: <span className="text-gray-300 shadow-purple-500/50">{userId}</span>
+             <div className="font-mono text-purple-200/60 text-xs tracking-widest uppercase">
+               User_ID: <span className="text-white font-bold drop-shadow-md">{userId}</span>
              </div>
              
              {/* TOP UP TRIGGER */}
              <button 
                onClick={() => setShowTopUpModal(true)}
-               className="w-full md:w-auto bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-purple-400 hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2 active:scale-95"
+               className="w-full md:w-auto bg-white text-indigo-900 px-8 py-3 rounded-full font-bold hover:bg-purple-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2 active:scale-95"
              >
                <span>+</span> Add Funds
              </button>
