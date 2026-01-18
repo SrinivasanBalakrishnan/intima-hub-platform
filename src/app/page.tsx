@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 
-// FIX: Changed './' to '../' because folders are in 'src', not 'app'
-import { useIntima } from "../context/IntimaContext";
-import SplashScreen from "../components/SplashScreen";
+// FIX: Use './' because 'context' and 'components' are neighbor folders inside 'src/app'
+import { useIntima } from "./context/IntimaContext";
+import SplashScreen from "./components/SplashScreen";
 
 export default function Home() {
   // 1. CONNECT TO GLOBAL BRAIN
@@ -15,6 +15,7 @@ export default function Home() {
   const [showSecurity, setShowSecurity] = useState(false);
 
   // --- 2. THE GATEKEEPER LOGIC ---
+  // If the user hasn't "hacked" in yet, show the Splash Screen
   if (!hasSeenSplash) {
     return <SplashScreen />;
   }
