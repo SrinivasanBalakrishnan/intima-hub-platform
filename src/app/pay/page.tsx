@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image"; // Added for Logo integration
 import { useIntima } from "../context/IntimaContext";
 
 export default function PayPage() {
@@ -23,8 +24,6 @@ export default function PayPage() {
     // Simulate Banking Handshake & Latency
     setTimeout(() => {
       // Determine descriptor based on privacy toggle
-      // If Shield is ON -> "IH Cloud Services"
-      // If Shield is OFF -> "Intima Pay Global"
       const merchantName = isMaskingActive ? "IH Cloud Services LLC" : "Intima Pay Global";
       
       // EXECUTE GLOBAL TRANSACTION
@@ -54,8 +53,8 @@ export default function PayPage() {
           <span>←</span> Back to Hub
         </Link>
         
-        {/* API STATUS BADGE */}
-        <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-sm">
+        {/* API STATUS BADGE (RESTORED) */}
+        <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-sm shadow-sm">
           <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
           <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
             Live_ID: ip_live_99283711
@@ -90,35 +89,46 @@ export default function PayPage() {
           </button>
         </div>
 
-        {/* 2. THE GLASS VAULT CARD (HERO) */}
-        <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-2xl shadow-purple-900/20">
+        {/* 2. THE GLASS VAULT CARD (ENTERPRISE UPGRADE) */}
+        {/* Added: True Glassmorphism & Neon Glow */}
+        <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-[0_0_40px_rgba(168,85,247,0.15)] border border-white/10">
+          
           {/* Glass Effect Layers */}
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/80 to-black/80 backdrop-blur-xl border border-white/10 z-0"></div>
-          <div className="absolute top-0 right-0 p-40 bg-purple-500/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-2xl z-0"></div>
+          {/* Subtle sheen layer */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50 z-0 pointer-events-none"></div>
           
           {/* Card Content */}
           <div className="relative z-10 flex justify-between items-start">
              <div>
                 <span className="block text-gray-400 text-xs font-mono uppercase tracking-widest mb-1">Available Liquidity</span>
-                <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2">
+                <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2 text-shadow-sm">
                   {balance.toFixed(2)} 
                   <span className="text-xl text-purple-400 font-normal">INT</span>
                 </div>
              </div>
-             <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center backdrop-blur-md">
-               <span className="text-2xl">🛡️</span>
+             
+             {/* LOGO SWAP (Restored from Emoji to Image) */}
+             <div className="w-14 h-14 rounded-full border border-white/20 bg-black/20 flex items-center justify-center backdrop-blur-md overflow-hidden shadow-inner">
+               <Image 
+                 src="/logo.jpg" 
+                 alt="Intima Logo" 
+                 width={56} 
+                 height={56} 
+                 className="object-cover w-full h-full opacity-90"
+               />
              </div>
           </div>
 
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
              <div className="font-mono text-gray-500 text-xs tracking-widest uppercase">
-               User_ID: <span className="text-gray-300">{userId}</span>
+               User_ID: <span className="text-gray-300 shadow-purple-500/50">{userId}</span>
              </div>
              
              {/* TOP UP TRIGGER */}
              <button 
                onClick={() => setShowTopUpModal(true)}
-               className="w-full md:w-auto bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-purple-400 hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 active:scale-95"
+               className="w-full md:w-auto bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-purple-400 hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2 active:scale-95"
              >
                <span>+</span> Add Funds
              </button>
@@ -166,19 +176,24 @@ export default function PayPage() {
           </div>
         </div>
 
-        {/* B2B FOOTER */}
+        {/* 4. INSTITUTIONAL FOOTER (RESTORED EXACTLY) */}
         <div className="mt-8 pt-6 border-t border-zinc-800/50 text-center pb-12">
+           <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">
+             Institutional Infrastructure
+           </p>
            <button 
-             onClick={() => alert("Enterprise API Sandbox Access Required.")}
-             className="text-[10px] text-zinc-600 hover:text-purple-500 transition-colors uppercase tracking-widest font-mono"
+             onClick={() => alert("Intima API Sandbox: Enterprise Access Required.\n\nPlease contact zirive.hnw@gmail.com for API keys.")}
+             className="group flex items-center justify-center gap-2 mx-auto text-xs font-mono text-zinc-500 hover:text-purple-400 transition-all border border-transparent hover:border-purple-500/30 px-4 py-2 rounded-full hover:bg-purple-500/10"
            >
-             [ Developer_API_Docs_v2.0 ]
+             <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+             <span>Developer_API_Docs_v2.0</span>
+             <span className="opacity-50 group-hover:opacity-100 transition-opacity">↗</span>
            </button>
         </div>
 
       </div>
 
-      {/* 4. MODAL: LIQUIDITY INJECTION (Top Up) */}
+      {/* 5. MODAL: LIQUIDITY INJECTION (Top Up) */}
       {showTopUpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
            <div className="bg-zinc-900 border border-purple-500/30 w-full max-w-md rounded-2xl p-6 shadow-[0_0_50px_rgba(168,85,247,0.15)] relative overflow-hidden">
