@@ -48,13 +48,6 @@ type IntimaContextType = {
   logout: () => void;                   // The Exit Function
 };
 
-// --- INITIAL MOCK DATA ---
-const INITIAL_TRANSACTIONS: Transaction[] = [
-  { id: 'TX-992', merchant: 'Intima Shop Decentralized', amount: 12.99, date: 'Today, 10:30 AM', type: 'debit', status: 'completed' },
-  { id: 'TX-881', merchant: 'Dr. Sharma Consult', amount: 50.00, date: 'Yesterday', type: 'debit', status: 'completed' },
-  { id: 'TX-774', merchant: 'Anon-Exchange TopUp', amount: 200.00, date: 'Oct 24', type: 'credit', status: 'completed' },
-];
-
 const IntimaContext = createContext<IntimaContextType | undefined>(undefined);
 
 export function IntimaProvider({ children }: { children: ReactNode }) {
@@ -64,16 +57,16 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [vaultKey, setVaultKey] = useState<string | null>(null);
   
-  // Core App Data
-  const [balance, setBalance] = useState(1240.50);
+  // Core App Data (Default to 0 until loaded)
+  const [balance, setBalance] = useState(0); 
   const [cart, setCart] = useState<Product[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [userId, setUserId] = useState("Guest_User");
   
   // Animation State
   const [hasSeenSplash, setHasSeenSplash] = useState(false);
 
-  // --- 2. SESSION RECOVERY (NEW: Fix for "Back Button" Bug) ---
+  // --- 2. SESSION RECOVERY (Fix for "Back Button" Bug) ---
   useEffect(() => {
     // A. Check if a session is active in this browser tab (Session Storage)
     const activeSession = sessionStorage.getItem('intima_active_session');
@@ -84,7 +77,6 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     }
     
     // B. Check global splash setting (Local Storage)
-    // This handles the "Have they seen the intro?" logic separately
     if (typeof window !== 'undefined') {
       const savedSplash = localStorage.getItem('intima_global_splash');
       if (savedSplash === 'true') setHasSeenSplash(true);
@@ -102,9 +94,7 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     setVaultKey(derivedKey);
     setUserId(derivedId);
 
-    // NEW: Save active session to sessionStorage 
-    // This allows page refreshes/navigation without logging out, 
-    // but wipes the session when the tab/browser is closed.
+    // Save active session to sessionStorage 
     sessionStorage.setItem('intima_active_session', mnemonic);
 
     // Attempt to load data from the vault
@@ -112,7 +102,7 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
       const savedData = localStorage.getItem(derivedKey);
       
       if (savedData) {
-        // SCENARIO: RETURNING USER (Restore Balance)
+        // --- SCENARIO A: RETURNING USER (Restore Existing Data) ---
         try {
           const parsed = JSON.parse(savedData);
           setBalance(parsed.balance);
@@ -122,10 +112,23 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
           console.error("Vault corruption detected", e);
         }
       } else {
-        // SCENARIO: NEW IDENTITY (Fresh Wallet)
-        setBalance(1240.50); // Starting Bonus
+        // --- SCENARIO B: NEW IDENTITY (Genesis Block) ---
+        // Initialize with exactly 499 INT as requested
+        const genesisBalance = 499.00;
+        
+        // Create the Genesis Transaction Record
+        const genesisTx: Transaction = {
+          id: 'GENESIS-001',
+          merchant: 'Intima Protocol Airdrop',
+          amount: 499.00,
+          date: new Date().toLocaleDateString(),
+          type: 'credit',
+          status: 'completed'
+        };
+
+        setBalance(genesisBalance);
         setCart([]);
-        setTransactions(INITIAL_TRANSACTIONS);
+        setTransactions([genesisTx]);
       }
     }
 
@@ -148,7 +151,7 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     }
   }, [balance, cart, transactions, isAuthenticated, vaultKey]);
 
-  // Save Splash State globally (Separate from Vault)
+  // Save Splash State globally
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('intima_global_splash', hasSeenSplash.toString());
@@ -175,7 +178,7 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
       id: `TX-${Math.floor(Math.random() * 90000)}`,
       merchant,
       amount,
-      date: 'Just Now',
+      date: new Date().toLocaleDateString(),
       type,
       status: 'completed'
     };
@@ -209,13 +212,8 @@ export function IntimaProvider({ children }: { children: ReactNode }) {
     setHasSeenSplash(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem('intima_global_splash', 'false');
-      
-      // NEW: Clear the Session Token so they don't auto-login on refresh
       sessionStorage.removeItem('intima_active_session');
     }
-    
-    // NOTE: We do NOT delete the localStorage vault item. 
-    // That persists so the user can "Restore" later.
   };
 
   return (

@@ -2,218 +2,250 @@
 
 import { useState } from "react";
 import Link from "next/link";
-// 1. IMPORT THE GLOBAL BRAIN (Critical Fix)
 import { useIntima } from "../context/IntimaContext";
 
 export default function PayPage() {
-  // 2. CONNECT TO GLOBAL STATE
-  // Instead of local state, we pull live data from the context
-  const { balance, transactions, addTransaction } = useIntima();
+  // 1. CONNECT TO GLOBAL BRAIN
+  const { balance, transactions, addTransaction, userId } = useIntima();
 
   // --- LOCAL UI STATE ---
   const [isMaskingActive, setIsMaskingActive] = useState(true);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // --- TOP UP ENGINE (The Privacy Gateway) ---
-  const executeTopUp = (amount: number) => {
+  const executeTopUp = () => {
+    if (!selectedAmount) return;
+    
     setIsProcessing(true);
     
-    // Simulate API Latency & Banking Handshake
+    // Simulate Banking Handshake & Latency
     setTimeout(() => {
-      // Determine the descriptor based on privacy toggle
+      // Determine descriptor based on privacy toggle
+      // If Shield is ON -> "IH Cloud Services"
+      // If Shield is OFF -> "Intima Pay Global"
       const merchantName = isMaskingActive ? "IH Cloud Services LLC" : "Intima Pay Global";
-      const descriptorText = isMaskingActive ? "Wallet Load (Masked)" : "Intima Pay Load";
-
+      
       // EXECUTE GLOBAL TRANSACTION
-      addTransaction(descriptorText, amount, 'credit');
+      addTransaction(merchantName, selectedAmount, 'credit');
 
+      // Reset State
       setIsProcessing(false);
       setShowTopUpModal(false);
+      setSelectedAmount(null);
+      alert(`Funds Secured. Bank Statement Descriptor: ${isMaskingActive ? "IH_CLOUD_SVS" : "INTIMA_PAY"}`);
     }, 2000);
   };
 
   return (
-    <div className="min-h-screen bg-black text-gray-100 font-sans relative p-6 pb-20">
+    <div className="min-h-screen bg-black text-gray-100 font-sans pb-24 relative overflow-hidden">
       
-      {/* 1. BACK BUTTON */}
-      <Link
-        href="/"
-        className="fixed top-5 left-5 z-[9999] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-purple-500 transition-all shadow-lg flex items-center gap-2"
-      >
-        <span>←</span> Back to Hub
-      </Link>
-        
+      {/* BACKGROUND FX */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-green-900/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-      {/* 2. ENTERPRISE HEADER */}
-      <header className="mt-16 mb-8 flex flex-col items-center text-center">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-indigo-500 bg-clip-text text-transparent mb-2">
-          Intima-Pay
-        </h1>
-        <div className="flex flex-col gap-2 items-center">
-          <p className="text-gray-400">Quantum-Encrypted Wallet.</p>
-          
-          {/* API Key Badge */}
-          <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
-              Live_ID: ip_live_99283711
-            </span>
-          </div>
+      {/* 1. NAVIGATION BAR */}
+      <div className="fixed top-0 left-0 w-full z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800 p-4 flex justify-between items-center px-6">
+        <Link 
+          href="/"
+          className="group border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-purple-500 transition-all flex items-center gap-2"
+        >
+          <span>←</span> Back to Hub
+        </Link>
+        
+        {/* API STATUS BADGE */}
+        <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-sm">
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
+            Live_ID: ip_live_99283711
+          </span>
         </div>
-      </header>
+      </div>
 
-      {/* 3. MAIN DASHBOARD */}
-      <div className="max-w-md mx-auto relative">
+      <div className="max-w-4xl mx-auto px-6 mt-28">
         
-        {/* PRIVACY TOGGLE SWITCH */}
-        <div className="flex justify-end mb-4">
+        {/* HEADER & PRIVACY TOGGLE */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-white bg-clip-text text-transparent mb-2">
+              Intima Vault
+            </h1>
+            <p className="text-gray-400 text-sm">Non-Custodial Assets • Zero-Knowledge Protocol</p>
+          </div>
+
+          {/* PRIVACY SWITCH */}
           <button 
             onClick={() => setIsMaskingActive(!isMaskingActive)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
+            className={`flex items-center gap-3 px-4 py-2 rounded-full border transition-all ${
               isMaskingActive 
-                ? "bg-purple-900/20 border-purple-500/50" 
+                ? "bg-purple-900/20 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.2)]" 
                 : "bg-zinc-900 border-zinc-700 opacity-60"
             }`}
           >
-            <div className={`w-2 h-2 rounded-full ${isMaskingActive ? "bg-purple-400 shadow-[0_0_10px_#a855f7]" : "bg-gray-500"}`}></div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isMaskingActive ? "text-purple-300" : "text-gray-500"}`}>
+            <div className={`w-2 h-2 rounded-full ${isMaskingActive ? "bg-purple-400 animate-pulse" : "bg-gray-500"}`}></div>
+            <span className={`text-xs font-bold uppercase tracking-wider ${isMaskingActive ? "text-purple-300" : "text-gray-500"}`}>
               {isMaskingActive ? "Privacy Shield: ON" : "Shield: OFF"}
             </span>
           </button>
         </div>
 
-        {/* WALLET CARD */}
-        <div className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl p-8 shadow-2xl border border-purple-700/50 mb-8 relative overflow-hidden group">
-          {/* Holographic BG Effect */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/20 rounded-full blur-3xl -ml-5 -mb-5 pointer-events-none"></div>
+        {/* 2. THE GLASS VAULT CARD (HERO) */}
+        <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-2xl shadow-purple-900/20">
+          {/* Glass Effect Layers */}
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/80 to-black/80 backdrop-blur-xl border border-white/10 z-0"></div>
+          <div className="absolute top-0 right-0 p-40 bg-purple-500/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
           
-          <div className="flex justify-between items-start mb-1">
-            <p className="text-purple-200 text-sm">Total Privacy Balance</p>
-            <span className="text-xl opacity-80">💳</span>
+          {/* Card Content */}
+          <div className="relative z-10 flex justify-between items-start">
+             <div>
+                <span className="block text-gray-400 text-xs font-mono uppercase tracking-widest mb-1">Available Liquidity</span>
+                <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2">
+                  {balance.toFixed(2)} 
+                  <span className="text-xl text-purple-400 font-normal">INT</span>
+                </div>
+             </div>
+             <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center backdrop-blur-md">
+               <span className="text-2xl">🛡️</span>
+             </div>
           </div>
-          
-          <h2 className="text-4xl font-bold text-white mb-6 font-mono tracking-tight">
-            ${balance.toFixed(2)} <span className="text-lg opacity-60">INT</span>
-          </h2>
-          
-          <div className="flex gap-4">
-            <button 
-              onClick={() => setShowTopUpModal(true)}
-              className="flex-1 bg-white/20 hover:bg-white/30 text-white py-3 rounded-xl text-sm font-bold backdrop-blur-sm transition-all active:scale-95 shadow-lg"
-            >
-              + Add Funds
-            </button>
-            <button className="flex-1 bg-black/20 hover:bg-black/30 text-white py-3 rounded-xl text-sm font-medium backdrop-blur-sm transition-all border border-white/10">
-              Transfer
-            </button>
+
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
+             <div className="font-mono text-gray-500 text-xs tracking-widest uppercase">
+               User_ID: <span className="text-gray-300">{userId}</span>
+             </div>
+             
+             {/* TOP UP TRIGGER */}
+             <button 
+               onClick={() => setShowTopUpModal(true)}
+               className="w-full md:w-auto bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-purple-400 hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 active:scale-95"
+             >
+               <span>+</span> Add Funds
+             </button>
           </div>
         </div>
 
-        {/* TRANSACTIONS LIST */}
-        <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-4 ml-2 flex justify-between items-center">
-          <span>Recent Activity</span>
-          <span className="text-[10px] bg-zinc-800 px-2 py-1 rounded text-gray-500">REAL-TIME</span>
-        </h3>
-        
-        <div className="space-y-3 pb-8">
-          {transactions.map((tx) => (
-            <div key={tx.id} className="bg-zinc-900/50 p-4 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-zinc-700 transition-colors">
-              <div className="flex items-center gap-3">
-                {/* Dynamic Icon based on Transaction Type */}
-                <div className={`p-2 rounded-lg text-lg ${
-                  tx.type === 'credit' ? 'bg-purple-900/30 text-purple-400' : 'bg-red-900/30 text-red-400'
-                }`}>
-                  {tx.type === 'credit' ? '💳' : '🛒'}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-white text-sm font-medium">{tx.merchant}</p>
-                    {tx.type === 'credit' && isMaskingActive && tx.merchant.includes("Cloud") && (
-                      <span className="text-[9px] bg-zinc-800 text-gray-500 px-1 rounded border border-zinc-700">MASKED</span>
-                    )}
-                  </div>
-                  <p className="text-gray-500 text-xs">{tx.date} • {tx.status}</p>
-                </div>
-              </div>
-              <span className={`font-mono font-bold ${tx.type === 'credit' ? 'text-green-400' : 'text-red-400'}`}>
-                {tx.type === 'credit' ? '+' : '-'} {Math.abs(tx.amount).toFixed(2)}
-              </span>
+        {/* 3. IMMUTABLE LEDGER (HISTORY) */}
+        <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 min-h-[400px]">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+               <h2 className="text-xl font-bold text-white">Immutable Ledger</h2>
+               <span className="text-[10px] bg-zinc-800 text-gray-500 px-2 py-0.5 rounded border border-zinc-700">REAL-TIME</span>
             </div>
-          ))}
-          
-          {transactions.length === 0 && (
-            <div className="text-center text-zinc-600 text-sm py-8">No transactions yet.</div>
-          )}
+            <button className="text-xs text-gray-500 hover:text-white transition-colors cursor-not-allowed" title="Disabled for Privacy">Export CSV 🔒</button>
+          </div>
+
+          <div className="space-y-3">
+            {transactions.length === 0 ? (
+              <div className="text-center py-20 text-gray-600 flex flex-col items-center">
+                <span className="text-4xl opacity-20 mb-2">⛓️</span>
+                <span>No transactions found on chain.</span>
+              </div>
+            ) : (
+              transactions.map((tx) => (
+                <div key={tx.id} className="flex items-center justify-between p-4 bg-black/40 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-inner ${
+                      tx.type === 'credit' ? 'bg-green-900/20 text-green-400' : 'bg-red-900/20 text-red-400'
+                    }`}>
+                      {tx.type === 'credit' ? '↓' : '↑'}
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold text-sm group-hover:text-purple-300 transition-colors">{tx.merchant}</h4>
+                      <p className="text-gray-500 text-xs font-mono">{tx.date} • {tx.status}</p>
+                    </div>
+                  </div>
+                  <div className={`font-mono font-bold ${
+                    tx.type === 'credit' ? 'text-green-400' : 'text-white'
+                  }`}>
+                    {tx.type === 'credit' ? '+' : '-'}{Math.abs(tx.amount).toFixed(2)} INT
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* --- B2B ENTERPRISE API SIGNAL --- */}
-        <div className="mt-8 pt-6 border-t border-zinc-800 text-center pb-12">
-          <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Institutional Infrastructure</p>
-          <button 
-            onClick={() => alert("Intima API Sandbox: Enterprise Access Required.\n\nPlease contact zirive.hnw@gmail.com for API keys.")}
-            className="group flex items-center justify-center gap-2 mx-auto text-xs font-mono text-zinc-500 hover:text-purple-400 transition-all border border-transparent hover:border-purple-500/30 px-4 py-2 rounded-full hover:bg-purple-500/10"
-          >
-            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
-            <span>Developer_API_Docs_v2.0</span>
-            <span className="opacity-50 group-hover:opacity-100 transition-opacity">↗</span>
-          </button>
+        {/* B2B FOOTER */}
+        <div className="mt-8 pt-6 border-t border-zinc-800/50 text-center pb-12">
+           <button 
+             onClick={() => alert("Enterprise API Sandbox Access Required.")}
+             className="text-[10px] text-zinc-600 hover:text-purple-500 transition-colors uppercase tracking-widest font-mono"
+           >
+             [ Developer_API_Docs_v2.0 ]
+           </button>
         </div>
+
       </div>
 
       {/* 4. MODAL: LIQUIDITY INJECTION (Top Up) */}
       {showTopUpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-zinc-900 border border-purple-500/30 rounded-2xl w-full max-w-sm p-6 shadow-[0_0_50px_rgba(168,85,247,0.2)] relative overflow-hidden">
-            
-            {/* Close Button */}
-            <button 
-              onClick={() => !isProcessing && setShowTopUpModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-800"
-            >✕</button>
+           <div className="bg-zinc-900 border border-purple-500/30 w-full max-w-md rounded-2xl p-6 shadow-[0_0_50px_rgba(168,85,247,0.15)] relative overflow-hidden">
+             
+             {/* Close Button */}
+             <button 
+               onClick={() => !isProcessing && setShowTopUpModal(false)}
+               className="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-800 transition-colors"
+             >✕</button>
 
-            {/* Modal Content */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-white mb-1">Load Funds</h3>
-              <p className="text-gray-400 text-xs">Funds are tokenized 1:1 into INT.</p>
-            </div>
+             <div className="text-center mb-8">
+               <h2 className="text-2xl font-bold text-white mb-2">Fiat-to-Token Bridge</h2>
+               <p className="text-gray-400 text-xs">
+                 Selected Privacy Mode: <span className={`font-mono px-1.5 py-0.5 rounded text-[10px] font-bold ${isMaskingActive ? "bg-purple-900 text-purple-300" : "bg-zinc-800 text-gray-400"}`}>
+                   {isMaskingActive ? "ENHANCED (MASKED)" : "STANDARD"}
+                 </span>
+               </p>
+             </div>
 
-            {isProcessing ? (
-              <div className="py-8 text-center">
-                <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <h4 className="text-white font-bold text-sm mb-1">Connecting to Banking Rail...</h4>
-                <p className="text-purple-400 text-[10px] font-mono animate-pulse uppercase">
-                  Swapping Descriptor to "IH Cloud Services"...
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  {[50, 100, 250, 500].map((amt) => (
-                    <button 
-                      key={amt}
-                      onClick={() => executeTopUp(amt)}
-                      className="bg-zinc-800 hover:bg-purple-900/20 border border-zinc-700 hover:border-purple-500 text-white py-3 rounded-xl font-mono text-lg transition-all focus:scale-95"
-                    >
-                      ${amt}
-                    </button>
-                  ))}
-                </div>
+             {/* Amount Selection */}
+             <div className="grid grid-cols-3 gap-3 mb-8">
+               {[50, 100, 250].map((amt) => (
+                 <button
+                   key={amt}
+                   onClick={() => setSelectedAmount(amt)}
+                   disabled={isProcessing}
+                   className={`py-4 rounded-xl border transition-all font-mono font-bold text-lg ${
+                     selectedAmount === amt 
+                       ? 'bg-purple-600 border-purple-400 text-white shadow-lg shadow-purple-900/50' 
+                       : 'bg-zinc-800 border-zinc-700 text-gray-400 hover:border-purple-500/50 hover:text-white'
+                   }`}
+                 >
+                   ${amt}
+                 </button>
+               ))}
+             </div>
 
-                {/* Privacy Assurance Box */}
-                <div className="bg-purple-900/10 border border-purple-500/20 p-3 rounded-xl flex gap-3 items-start mt-2">
-                  <div className="text-purple-400 text-lg">🛡️</div>
-                  <div>
-                    <p className="text-purple-200 text-xs font-bold mb-0.5">Privacy Shield Active</p>
-                    <p className="text-purple-400/60 text-[10px] leading-snug">
-                      Your bank statement will NOT show "Intima Pay". The charge will appear as "IH Cloud Services LLC".
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+             {/* Summary */}
+             {selectedAmount && (
+               <div className="bg-black/50 p-4 rounded-xl mb-6 flex justify-between items-center border border-zinc-800 animate-in slide-in-from-top-2">
+                 <span className="text-gray-400 text-sm">You Receive:</span>
+                 <span className="text-purple-400 font-mono font-bold text-xl">{selectedAmount}.00 INT</span>
+               </div>
+             )}
+
+             {/* Action */}
+             <button 
+               onClick={executeTopUp}
+               disabled={!selectedAmount || isProcessing}
+               className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-purple-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-3 shadow-lg"
+             >
+               {isProcessing ? (
+                 <>
+                   <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                   <span>Securing Funds...</span>
+                 </>
+               ) : (
+                 "Confirm Secure Transfer"
+               )}
+             </button>
+             
+             {/* Security Footer */}
+             <div className="mt-6 flex items-center justify-center gap-2 text-[10px] text-gray-500 uppercase tracking-widest">
+               <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+               256-Bit SSL Encrypted
+             </div>
+           </div>
         </div>
       )}
 
