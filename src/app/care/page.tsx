@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useIntima } from "../context/IntimaContext";
+import { useIntima } from "../../context/IntimaContext";
 
 // --- MOCK DATABASE (Enhanced with Bio & Stats & Numeric Pricing) ---
 const DOCTORS = [

@@ -13,7 +13,6 @@ export default function BotPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
     const userMessage = { role: "user", content: input };

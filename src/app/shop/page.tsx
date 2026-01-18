@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+// FIX: Up one level (..) to find context in 'app'
 import { useIntima } from "../context/IntimaContext";
 
 // --- MOCK PRODUCT DATABASE (UPDATED TO INT PRICING) ---
@@ -93,7 +94,8 @@ export default function ShopPage() {
 
   const handleCheckout = () => {
     // 1. Calculate the Final Total again
-    const subtotal = cart.reduce((total, item) => total + item.price, 0);
+    // FIX: Added types (total: number, item: any)
+    const subtotal = cart.reduce((total: number, item: any) => total + item.price, 0);
     // Tax is minimal in Token Economy, keeping 8% logic for consistency
     const tax = Math.floor(subtotal * 0.08);
     const finalTotal = subtotal + tax;
@@ -125,7 +127,8 @@ export default function ShopPage() {
   };
 
   // Calculate Total Price for Display
-  const cartTotal = cart.reduce((total, item) => total + item.price, 0);
+  // FIX: Added types (total: number, item: any)
+  const cartTotal = cart.reduce((total: number, item: any) => total + item.price, 0);
   const taxVal = Math.floor(cartTotal * 0.08); 
   const finalTotalDisplay = cartTotal + taxVal;
 
@@ -289,7 +292,8 @@ export default function ShopPage() {
                       <button onClick={closeDrawer} className="mt-4 text-pink-500 hover:underline text-sm">Continue Shopping</button>
                     </div>
                   ) : (
-                    cart.map((item, index) => (
+                    // FIX: Added types (item: any, index: number)
+                    cart.map((item: any, index: number) => (
                       <div key={index} className="flex items-center gap-4 bg-black/40 p-3 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
                         <div className="text-3xl bg-zinc-800 w-12 h-12 flex items-center justify-center rounded-lg">{item.icon}</div>
                         <div className="flex-1">
@@ -349,7 +353,8 @@ export default function ShopPage() {
 
                   {/* Itemized List */}
                   <div className="space-y-2 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar">
-                    {cart.map((item, i) => (
+                    {/* FIX: Added types (item: any, i: number) */}
+                    {cart.map((item: any, i: number) => (
                       <div key={i} className="flex justify-between">
                         <span className="text-gray-300 truncate w-2/3">
                           {item.name}

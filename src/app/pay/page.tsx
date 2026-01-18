@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; 
+// FIX: Up one level (..) to find context in 'app'
 import { useIntima } from "../context/IntimaContext";
 
 export default function PayPage() {
@@ -93,7 +94,6 @@ export default function PayPage() {
         </div>
 
         {/* 2. THE GLASS VAULT CARD (ULTRA-MODERN UPGRADE) */}
-        {/* UPGRADE: Replaced dark bg with Vibrant Indigo Gradient */}
         <div className="relative w-full aspect-[1.8/1] md:aspect-[2.5/1] rounded-3xl overflow-hidden p-8 flex flex-col justify-between mb-12 group transition-all hover:scale-[1.005] shadow-[0_0_50px_rgba(139,92,246,0.25)] border border-white/20">
           
           {/* VIBRANT GRADIENT LAYER */}
@@ -104,38 +104,38 @@ export default function PayPage() {
           
           {/* Card Content */}
           <div className="relative z-10 flex justify-between items-start">
-             <div>
+              <div>
                 <span className="block text-purple-100/80 text-xs font-mono uppercase tracking-widest mb-1">Available Intima Tokens</span>
                 <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2 drop-shadow-lg">
                   {balance.toFixed(2)} 
                   <span className="text-xl text-purple-200 font-normal">INT</span>
                 </div>
-             </div>
-             
-             {/* LOGO */}
-             <div className="w-14 h-14 rounded-full border border-white/30 bg-white/10 flex items-center justify-center backdrop-blur-md overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-               <Image 
-                 src="/logo.jpg" 
-                 alt="Intima Logo" 
-                 width={56} 
-                 height={56} 
-                 className="object-cover w-full h-full opacity-95"
-               />
-             </div>
+              </div>
+              
+              {/* LOGO */}
+              <div className="w-14 h-14 rounded-full border border-white/30 bg-white/10 flex items-center justify-center backdrop-blur-md overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                <Image 
+                  src="/logo.jpg" 
+                  alt="Intima Logo" 
+                  width={56} 
+                  height={56} 
+                  className="object-cover w-full h-full opacity-95"
+                />
+              </div>
           </div>
 
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
-             <div className="font-mono text-purple-200/60 text-xs tracking-widest uppercase">
-               User_ID: <span className="text-white font-bold drop-shadow-md">{userId}</span>
-             </div>
-             
-             {/* TOP UP TRIGGER */}
-             <button 
-               onClick={() => setShowTopUpModal(true)}
-               className="w-full md:w-auto bg-white text-indigo-900 px-8 py-3 rounded-full font-bold hover:bg-purple-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2 active:scale-95"
-             >
-               <span>+</span> Add Funds
-             </button>
+              <div className="font-mono text-purple-200/60 text-xs tracking-widest uppercase">
+                User_ID: <span className="text-white font-bold drop-shadow-md">{userId}</span>
+              </div>
+              
+              {/* TOP UP TRIGGER */}
+              <button 
+                onClick={() => setShowTopUpModal(true)}
+                className="w-full md:w-auto bg-white text-indigo-900 px-8 py-3 rounded-full font-bold hover:bg-purple-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2 active:scale-95"
+              >
+                <span>+</span> Add Funds
+              </button>
           </div>
         </div>
 
