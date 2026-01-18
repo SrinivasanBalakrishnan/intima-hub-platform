@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useIntima } from "../context/IntimaContext";
 
-// --- MOCK DATABASE (Enhanced with Bio & Stats) ---
+// --- MOCK DATABASE (Enhanced with Bio & Stats & Numeric Pricing) ---
 const DOCTORS = [
   {
     id: 1,
@@ -14,7 +15,7 @@ const DOCTORS = [
     status: "Online",
     category: "Physical",
     image: "👨‍⚕️",
-    price: "500 INT",
+    price: 500, // Changed to Number for math
     rating: 4.9,
     reviews: 124,
     bio: "Specialist in reproductive health and anxiety management. 10+ years of experience in confidential patient care.",
@@ -29,7 +30,7 @@ const DOCTORS = [
     status: "Offline",
     category: "Mental",
     image: "👩‍⚕️",
-    price: "650 INT",
+    price: 650, // Changed to Number for math
     rating: 5.0,
     reviews: 215,
     bio: "Focuses on the psychology of intimacy and relationship counseling. LGBTQ+ friendly and trauma-informed.",
@@ -44,7 +45,7 @@ const DOCTORS = [
     status: "Busy",
     category: "Physical",
     image: "👨‍⚕️",
-    price: "800 INT",
+    price: 800, // Changed to Number for math
     rating: 4.8,
     reviews: 89,
     bio: "Expert in male sexual wellness and hormonal balance. Discrete and judgment-free consultations.",
@@ -54,6 +55,7 @@ const DOCTORS = [
 
 export default function CarePage() {
   // --- STATE MANAGEMENT ---
+  const { balance, addTransaction } = useIntima(); // CONNECT TO WALLET
   const [filter, setFilter] = useState("All");
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   
@@ -77,12 +79,22 @@ export default function CarePage() {
 
   // 2. Proceed to Booking
   const proceedToBooking = () => {
+    // ENTERPRISE GUARDRAIL: Check Liquidity
+    if (balance < selectedDoctor.price) {
+      alert(`Insufficient Liquidity. You need ${selectedDoctor.price - balance} more INT.\n\nRedirecting to Top-Up Bridge...`);
+      window.location.href = "/pay";
+      return;
+    }
     setViewState('booking');
   };
 
   // 3. Confirm & Show Success
   const confirmBooking = () => {
     if (!selectedSlot) return;
+    
+    // EXECUTE TRANSACTION
+    addTransaction(`Consult: ${selectedDoctor.name}`, selectedDoctor.price, 'debit');
+    
     setViewState('success');
   };
 
@@ -97,7 +109,6 @@ export default function CarePage() {
     <div className="min-h-screen bg-black text-gray-100 font-sans relative p-6 pb-24">
       
       {/* 1. BACK BUTTON */}
-
       <Link
         href="/"
         className="fixed top-5 left-5 z-[40] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-green-500 transition-all shadow-lg flex items-center gap-2"
@@ -111,6 +122,11 @@ export default function CarePage() {
           Intima-Care
         </h1>
         <p className="text-gray-400 text-sm">Anonymous Consultation. Verified Specialists.</p>
+        
+        {/* BALANCE BADGE (Mobile/Desktop) */}
+        <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800">
+           <span className="text-[10px] text-green-400 font-mono tracking-widest">BAL: {balance.toFixed(0)} INT</span>
+        </div>
       </header>
 
       {/* 3. CATEGORY FILTERS */}
@@ -197,7 +213,7 @@ export default function CarePage() {
 
             {/* Desktop: Price/Chevron Right */}
             <div className="hidden sm:flex flex-col items-end gap-1">
-              <span className="text-green-400 font-mono font-bold">{doc.price}</span>
+              <span className="text-green-400 font-mono font-bold">{doc.price} INT</span>
               <span className="text-xs text-gray-600">per session</span>
             </div>
           </div>
@@ -268,7 +284,7 @@ export default function CarePage() {
                     className="w-full bg-green-600 hover:bg-green-500 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-900/20 active:scale-95 flex items-center justify-center gap-2"
                   >
                     <span>Book Appointment</span>
-                    <span className="opacity-70 text-sm">({selectedDoctor.price})</span>
+                    <span className="opacity-70 text-sm">({selectedDoctor.price} INT)</span>
                   </button>
                 </div>
               </div>
@@ -321,7 +337,7 @@ export default function CarePage() {
                   disabled={!selectedSlot}
                   className="w-full mt-6 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white py-4 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
                 >
-                  Confirm Booking
+                  Confirm Booking (-{selectedDoctor.price} INT)
                 </button>
               </div>
             )}

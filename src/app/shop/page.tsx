@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-// 1. IMPORT THE GLOBAL BRAIN
-import { useIntima } from "../context/IntimaContext";
 import Link from "next/link";
+import { useIntima } from "../context/IntimaContext";
 
-// --- MOCK PRODUCT DATABASE ---
+// --- MOCK PRODUCT DATABASE (UPDATED TO INT PRICING) ---
 const PRODUCTS = [
   {
     id: 1,
     name: "Bio-Condoms (12 Pack)",
-    price: 12.99,
+    price: 1299, // Was $12.99
     desc: "100% biodegradable latex. Packaging infused with wildflower seeds.",
     icon: "🌿",
     color: "text-green-400",
@@ -19,7 +18,7 @@ const PRODUCTS = [
   {
     id: 2,
     name: "Organic Aloe Lube",
-    price: 18.50,
+    price: 1850, // Was $18.50
     desc: "Water-based, pH-balanced, and completely plastic-free glass bottle.",
     icon: "💧",
     color: "text-blue-400",
@@ -28,7 +27,7 @@ const PRODUCTS = [
   {
     id: 3,
     name: "Sensitivity Kit",
-    price: 45.00,
+    price: 4500, // Was $45.00
     desc: "Includes 3 textures of condoms and sampler lube pack.",
     icon: "🎁",
     color: "text-pink-400",
@@ -37,7 +36,7 @@ const PRODUCTS = [
   {
     id: 4,
     name: "Wellness Supplement",
-    price: 29.99,
+    price: 2999, // Was $29.99
     desc: "Natural libido support with Ashwagandha and Maca.",
     icon: "💊",
     color: "text-purple-400",
@@ -47,7 +46,7 @@ const PRODUCTS = [
 
 export default function ShopPage() {
   // --- 2. CONNECT TO GLOBAL STATE ---
-  const { cart, addToCart: globalAdd, removeFromCart: globalRemove, clearCart, addTransaction } = useIntima();
+  const { cart, addToCart: globalAdd, removeFromCart: globalRemove, clearCart, addTransaction, balance } = useIntima();
 
   // --- LOCAL UI STATE ---
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -76,8 +75,9 @@ export default function ShopPage() {
     const isSub = subscriptions[product.id];
     
     // Logic: Apply 15% discount if subscribed
+    // Math.floor used to keep INT as whole numbers (optional, but cleaner)
     const finalPrice = isSub 
-      ? Number((product.price * 0.85).toFixed(2)) 
+      ? Math.floor(product.price * 0.85)
       : product.price;
 
     // Add to Global Context
@@ -92,15 +92,23 @@ export default function ShopPage() {
   };
 
   const handleCheckout = () => {
-    // 1. Calculate the Final Total again to be safe
+    // 1. Calculate the Final Total again
     const subtotal = cart.reduce((total, item) => total + item.price, 0);
-    const tax = subtotal * 0.08;
-    const finalTotal = Number((subtotal + tax).toFixed(2));
+    // Tax is minimal in Token Economy, keeping 8% logic for consistency
+    const tax = Math.floor(subtotal * 0.08);
+    const finalTotal = subtotal + tax;
 
-    // 2. DEDUCT FROM GLOBAL WALLET (The "Real" Transaction)
+    // 2. CHECK LIQUIDITY (Enterprise Guardrail)
+    if (balance < finalTotal) {
+      alert(`Transaction Failed: Insufficient Liquidity.\n\nRequired: ${finalTotal} INT\nAvailable: ${balance.toFixed(0)} INT\n\nRedirecting to Vault...`);
+      window.location.href = "/pay"; // Auto-route to Top-Up
+      return;
+    }
+
+    // 3. DEDUCT FROM GLOBAL WALLET (The "Real" Transaction)
     addTransaction("Intima Shop Purchase", finalTotal, 'debit');
 
-    // 3. Generate Invoice UI
+    // 4. Generate Invoice UI
     setOrderId(`ORD-${Math.floor(Math.random() * 90000) + 10000}`);
     setCheckoutStep("invoice");
   };
@@ -117,9 +125,9 @@ export default function ShopPage() {
   };
 
   // Calculate Total Price for Display
-  const cartTotal = cart.reduce((total, item) => total + item.price, 0).toFixed(2);
-  const tax = (parseFloat(cartTotal) * 0.08).toFixed(2); 
-  const finalTotal = (parseFloat(cartTotal) + parseFloat(tax)).toFixed(2);
+  const cartTotal = cart.reduce((total, item) => total + item.price, 0);
+  const taxVal = Math.floor(cartTotal * 0.08); 
+  const finalTotalDisplay = cartTotal + taxVal;
 
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans relative p-6 pb-20">
@@ -138,18 +146,25 @@ export default function ShopPage() {
           Intima-Shop
         </h1>
 
-        <button 
-          onClick={() => setIsCartOpen(true)}
-          className="relative p-2 text-2xl hover:scale-110 transition-transform"
-          aria-label="Open Cart"
-        >
-          🛒
-          {cart.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce shadow-lg shadow-red-500/50">
-              {cart.length}
-            </span>
-          )}
-        </button>
+        <div className="flex items-center gap-4">
+          {/* BALANCE BADGE */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800">
+             <span className="text-[10px] text-purple-300 font-mono tracking-widest">BAL: {balance.toFixed(0)} INT</span>
+          </div>
+
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-2xl hover:scale-110 transition-transform"
+            aria-label="Open Cart"
+          >
+            🛒
+            {cart.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce shadow-lg shadow-red-500/50">
+                {cart.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* 2. HEADER (Mobile Only) */}
@@ -158,6 +173,9 @@ export default function ShopPage() {
           Intima-Shop
         </h1>
         <p className="text-gray-400">Sustainable Intimacy. Discreet Delivery.</p>
+        <div className="md:hidden mt-2 inline-flex items-center gap-2 px-3 py-1 bg-zinc-900/50 rounded-full border border-zinc-800">
+           <span className="text-[10px] text-purple-300 font-mono tracking-widest">BAL: {balance.toFixed(0)} INT</span>
+        </div>
       </header>
 
       {/* 3. PRODUCT GRID */}
@@ -182,7 +200,7 @@ export default function ShopPage() {
             {/* Push content down so Price/Button are always at bottom */}
             <div className="mt-auto">
               
-              {/* SUBSCRIPTION TOGGLE (Your Feature) */}
+              {/* SUBSCRIPTION TOGGLE */}
               <div 
                 onClick={() => toggleSubscription(product.id)}
                 className={`mb-4 p-3 rounded-lg border flex items-center justify-between cursor-pointer transition-all group/sub ${
@@ -220,10 +238,10 @@ export default function ShopPage() {
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
                   <span className={`text-2xl font-bold ${product.color}`}>
-                    ${subscriptions[product.id] ? (product.price * 0.85).toFixed(2) : product.price}
+                    {subscriptions[product.id] ? Math.floor(product.price * 0.85) : product.price} <span className="text-sm font-normal text-gray-500">INT</span>
                   </span>
                   {subscriptions[product.id] && (
-                      <span className="text-[10px] text-gray-500 line-through">${product.price}</span>
+                      <span className="text-[10px] text-gray-500 line-through">{product.price} INT</span>
                   )}
                 </div>
                 
@@ -279,7 +297,7 @@ export default function ShopPage() {
                             {item.name}
                             {item.isSubscribed && <span className="ml-2 text-[10px] text-purple-400 border border-purple-500/30 px-1 rounded">SUB</span>}
                           </p>
-                          <p className="text-gray-400 text-xs font-mono">${item.price}</p>
+                          <p className="text-gray-400 text-xs font-mono">{item.price} INT</p>
                         </div>
                         <button onClick={() => globalRemove(index)} className="text-red-500 hover:text-red-300 text-xs hover:bg-red-900/20 px-3 py-1.5 rounded transition-colors">Remove</button>
                       </div>
@@ -291,7 +309,7 @@ export default function ShopPage() {
                 <div className="border-t border-zinc-800 pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-gray-400 text-sm uppercase tracking-wider">Subtotal</span>
-                    <span className="text-3xl font-bold text-green-400 font-mono">${cartTotal}</span>
+                    <span className="text-3xl font-bold text-green-400 font-mono">{cartTotal} INT</span>
                   </div>
                   <button 
                     onClick={handleCheckout}
@@ -337,7 +355,7 @@ export default function ShopPage() {
                           {item.name}
                           {item.isSubscribed && <span className="text-purple-400 text-[10px] ml-1">*</span>}
                         </span>
-                        <span className="text-white">${item.price}</span>
+                        <span className="text-white">{item.price}</span>
                       </div>
                     ))}
                   </div>
@@ -348,15 +366,15 @@ export default function ShopPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-gray-400">
                       <span>Subtotal</span>
-                      <span>${cartTotal}</span>
+                      <span>{cartTotal} INT</span>
                     </div>
                     <div className="flex justify-between text-gray-400">
                       <span>Tax (8%)</span>
-                      <span>${tax}</span>
+                      <span>{taxVal} INT</span>
                     </div>
                     <div className="flex justify-between text-green-400 font-bold text-lg mt-2 pt-2 border-t border-dashed border-zinc-700">
                       <span>TOTAL PAID</span>
-                      <span>${finalTotal}</span>
+                      <span>{finalTotalDisplay} INT</span>
                     </div>
                   </div>
                 </div>
