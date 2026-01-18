@@ -105,7 +105,7 @@ export default function PayPage() {
           {/* Card Content */}
           <div className="relative z-10 flex justify-between items-start">
              <div>
-                <span className="block text-purple-100/80 text-xs font-mono uppercase tracking-widest mb-1">Available Liquidity</span>
+                <span className="block text-purple-100/80 text-xs font-mono uppercase tracking-widest mb-1">Available Intima Tokens</span>
                 <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-baseline gap-2 drop-shadow-lg">
                   {balance.toFixed(2)} 
                   <span className="text-xl text-purple-200 font-normal">INT</span>
