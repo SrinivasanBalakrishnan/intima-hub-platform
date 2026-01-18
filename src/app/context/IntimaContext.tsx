@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-// FIX: Corrected relative path to sibling 'utils' folder
+// TESTER NOTE: Use '../' to go up from 'context' to 'app', then down to 'utils'
 import { generateIdFromMnemonic } from '../utils/security';
 
 // --- TYPES ---

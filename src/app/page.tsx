@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-// FIX: Use './' because 'context' and 'components' are neighbor folders inside 'src/app'
+// TESTER NOTE: These MUST be './' because folders are inside 'src/app'
 import { useIntima } from "./context/IntimaContext";
 import SplashScreen from "./components/SplashScreen";
 
@@ -15,7 +15,6 @@ export default function Home() {
   const [showSecurity, setShowSecurity] = useState(false);
 
   // --- 2. THE GATEKEEPER LOGIC ---
-  // If the user hasn't "hacked" in yet, show the Splash Screen
   if (!hasSeenSplash) {
     return <SplashScreen />;
   }
@@ -31,10 +30,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       
-      {/* --- A. ATMOSPHERE (Matching Splash Screen) --- */}
-      {/* Deep Space Gradient */}
+      {/* --- A. ATMOSPHERE --- */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-black to-black"></div>
-      {/* Noise Texture (The Premium Polish) */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 contrast-150 pointer-events-none"></div>
       
       {/* IDENTITY BADGE & EXIT */}
