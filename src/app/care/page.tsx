@@ -97,7 +97,7 @@ export default function CarePage() {
       <Link href="/" className={`fixed top-5 left-5 z-[50] bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-full text-[10px] font-black tracking-widest transition-all hover:${theme.text} hover:scale-105`}>← BACK TO HUB</Link>
       
       <header className="relative z-10 mt-16 mb-12 text-center">
-        <h1 className={`text-6xl font-black tracking-tighter uppercase italic mb-4 transition-colors ${theme.text}`}>Intima-Care</h1>
+        <h1 className={`text-6xl font-black tracking-tighter uppercase mb-4 transition-colors ${theme.text}`}>Intima-Care</h1>
         <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
            <span className={`w-2 h-2 rounded-full animate-pulse ${theme.bg}`}></span>
            <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest tracking-[0.2em]">Vault Balance: {balance.toFixed(0)} INT</span>
@@ -161,7 +161,7 @@ export default function CarePage() {
               {/* VIEW 2: SELECTION (DATE/TIME OR HOTEL) */}
               {viewState === 'selection' && (
                 <div className="text-center">
-                  <h3 className="text-2xl font-black mb-8 uppercase tracking-tighter">Booking Config</h3>
+                  <h3 className="text-2xl font-black mb-8 uppercase tracking-tighter">Pick your slot</h3>
                   
                   {/* DOCTORS & DIAGNOSTICS: DATE/TIME */}
                   {(activeTab === 'Doctors' || activeTab === 'Diagnostics') && (
@@ -216,7 +216,7 @@ export default function CarePage() {
               {/* VIEW 3: SETTLEMENT */}
               {viewState === 'booking' && (
                 <div className="text-center">
-                  <h3 className="text-2xl font-black mb-12 uppercase tracking-tighter">Settlement Config</h3>
+                  <h3 className="text-2xl font-black mb-12 uppercase tracking-tighter">Check out</h3>
                   {activeTab === 'Destinations' && (
                     <div className="bg-black/50 p-8 rounded-[32px] border border-zinc-800 flex justify-between items-center mb-12">
                       <button onClick={() => setStayDuration(Math.max(1, stayDuration - 1))} className="w-14 h-14 bg-zinc-800 rounded-full text-3xl font-bold transition-all hover:bg-zinc-700">-</button>
