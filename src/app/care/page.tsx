@@ -78,10 +78,10 @@ export default function CarePage() {
       <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] ${currentTheme.glow} via-black to-black transition-all duration-1000`}></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
 
-      <Link href="/" className="fixed top-5 left-5 z-[50] bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-full text-xs font-bold hover:border-white transition-all shadow-xl">← HUB</Link>
+      <Link href="/" className="fixed top-5 left-5 z-[50] bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-full text-xs font-bold hover:border-white transition-all shadow-xl">← Back to Hub</Link>
       
       <header className="relative z-10 mt-16 mb-12 text-center">
-        <h1 className="text-6xl font-black tracking-tighter uppercase italic mb-4">Intima-Care</h1>
+        <h1 className="text-6xl font-black tracking-tighter uppercase mb-4">Intima-Care</h1>
         <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
            <span className={`w-2 h-2 rounded-full animate-pulse ${currentTheme.bg}`}></span>
            <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest tracking-[0.2em]">Vault: {balance.toFixed(0)} INT</span>
