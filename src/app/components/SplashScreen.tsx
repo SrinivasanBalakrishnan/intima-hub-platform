@@ -1,3 +1,4 @@
+// FORCE_DEPLOY_TRIGGER_03
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,14 +15,14 @@ export default function SplashScreen() {
   const { login } = useIntima();
   
   // --- UI STATES ---
-  const [mode, setMode] = useState<'intro' | 'generating' | 'restoring'>('intro');
+  // Views: 'intro' | 'generating' (Terminal) | 'reveal' (The New Feature) | 'restoring'
+  const [mode, setMode] = useState<'intro' | 'generating' | 'reveal' | 'restoring'>('intro');
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [restoreInput, setRestoreInput] = useState("");
   
-  // Cleanup to prevent memory leaks
-  useEffect(() => {
-    return () => {};
-  }, []);
+  // Safety Stop States
+  const [tempMnemonic, setTempMnemonic] = useState("");
+  const [isSavedChecked, setIsSavedChecked] = useState(false);
 
   // --- ANIMATION LOGIC ---
   const handleGenerate = () => {
@@ -31,15 +32,17 @@ export default function SplashScreen() {
       "Allocating High-Entropy Memory...",
       "Forging Non-Custodial Keys...",
       "Encrypting Local Storage...",
-      "ACCESS GRANTED."
+      "PHRASE GENERATED SUCCESSFULLY."
     ];
 
     let stepIndex = 0;
     const interval = setInterval(() => {
       if (stepIndex >= steps.length) {
         clearInterval(interval);
+        // INSTEAD OF LOGIN: Show the words
         const newKey = generateMnemonic();
-        login(newKey);
+        setTempMnemonic(newKey);
+        setTimeout(() => setMode('reveal'), 500); // Small pause for effect
       } else {
         setTerminalLogs(prev => [...prev, steps[stepIndex]]);
         stepIndex++;
@@ -50,6 +53,17 @@ export default function SplashScreen() {
   const handleRestore = () => {
     if (!restoreInput.trim()) return;
     login(restoreInput);
+  };
+
+  const handleFinalLogin = () => {
+    if (isSavedChecked) {
+      login(tempMnemonic);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(tempMnemonic);
+    alert("Key phrase copied to clipboard. Store it safely!");
   };
 
   return (
@@ -72,12 +86,13 @@ export default function SplashScreen() {
             </div>
           </div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 mb-3 drop-shadow-sm">INTIMA</h1>
-          <p className="text-purple-200/60 font-mono text-xs uppercase tracking-[0.3em]">The Privacy-Native Operating System for Intimate Health & wellness</p>
+          <p className="text-purple-200/60 font-mono text-xs uppercase tracking-[0.3em]">Privacy-Native Operating System</p>
         </div>
 
         {/* INTERACTION AREA */}
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-2 shadow-2xl overflow-hidden relative group">
+        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-2 shadow-2xl overflow-hidden relative">
           
+          {/* VIEW: INTRO */}
           {mode === 'intro' && (
             <div className="p-4 space-y-4 animate-in fade-in zoom-in-95 duration-500">
               <button onClick={handleGenerate} className="w-full relative group/btn overflow-hidden rounded-xl bg-white text-black py-4 font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98]">
@@ -89,13 +104,66 @@ export default function SplashScreen() {
             </div>
           )}
 
+          {/* VIEW: GENERATING (Terminal) */}
           {mode === 'generating' && (
             <div className="p-6 font-mono text-xs h-[160px] flex flex-col justify-end bg-black/40 rounded-xl inner-shadow">
-              {terminalLogs.map((log, i) => <div key={i} className="mb-1 text-green-400/80 border-l-2 border-green-500 pl-2 animate-in slide-in-from-left-2 duration-200">{`> ${log}`}</div>)}
+              {terminalLogs.map((log, i) => (
+                <div key={i} className="mb-1 text-green-400/80 border-l-2 border-green-500 pl-2 animate-in slide-in-from-left-2 duration-200">
+                  {`> ${log}`}
+                </div>
+              ))}
               <div className="w-2 h-4 bg-green-500 animate-pulse mt-1"></div>
             </div>
           )}
 
+          {/* VIEW: REVEAL (The Safety Stop) */}
+          {mode === 'reveal' && (
+            <div className="p-6 space-y-5 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center">
+                <h3 className="text-white font-bold text-sm tracking-widest uppercase mb-1">Backup Phrase</h3>
+                <p className="text-[10px] text-gray-500">Store these 12 words in a safe, offline place.</p>
+              </div>
+
+              <div className="bg-black/60 border border-zinc-800 p-4 rounded-xl relative group">
+                <p className="text-green-400 font-mono text-sm leading-relaxed text-center italic">
+                  {tempMnemonic}
+                </p>
+                <button 
+                  onClick={copyToClipboard}
+                  className="absolute top-2 right-2 text-[10px] bg-zinc-800 text-gray-400 px-2 py-1 rounded hover:text-white transition-colors"
+                >
+                  Copy
+                </button>
+              </div>
+
+              <div className="flex items-start gap-3 px-1">
+                <input 
+                  type="checkbox" 
+                  id="safetyCheck" 
+                  checked={isSavedChecked}
+                  onChange={(e) => setIsSavedChecked(e.target.checked)}
+                  className="mt-1 w-4 h-4 accent-purple-600"
+                />
+                <label htmlFor="safetyCheck" className="text-[10px] text-gray-400 leading-tight cursor-pointer">
+                  I have manually backed up this phrase. I understand Intima Hub cannot recover my account without it.
+                </label>
+              </div>
+
+              <button 
+                onClick={handleFinalLogin}
+                disabled={!isSavedChecked}
+                className={`w-full py-4 rounded-xl font-bold transition-all ${
+                  isSavedChecked 
+                  ? "bg-white text-black hover:scale-[1.02] active:scale-[0.98]" 
+                  : "bg-zinc-800 text-gray-600 cursor-not-allowed"
+                }`}
+              >
+                Enter Hub
+              </button>
+            </div>
+          )}
+
+          {/* VIEW: RESTORING */}
           {mode === 'restoring' && (
             <div className="p-4 space-y-3 animate-in slide-in-from-right duration-300">
               <div className="text-center mb-2">
