@@ -1,9 +1,8 @@
-// FORCE_DEPLOY_TRIGGER_3D_OMNIBUS_FINAL
+// FORCE_DEPLOY_TRIGGER_3D_OMNIBUS_PRODUCTION_FINAL
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-// TESTER NOTE: Verified path to context from care subfolder
 import { useIntima } from "../context/IntimaContext";
 
 // --- 3D VERTICAL DATASETS (FULL REGISTRY) ---
@@ -72,54 +71,130 @@ export default function CarePage() {
 
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans p-6 pb-32">
-      <Link href="/" className="fixed top-5 left-5 z-[50] bg-zinc-900/90 border border-zinc-800 px-4 py-2 rounded-full text-xs font-bold hover:border-blue-500 transition-all">← HUB</Link>
+      <Link href="/" className="fixed top-5 left-5 z-[50] bg-zinc-900/90 border border-zinc-800 px-4 py-2 rounded-full text-xs font-bold hover:border-blue-500 transition-all shadow-xl">← HUB</Link>
+      
       <header className="mt-16 mb-12 text-center">
-        <h1 className="text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent mb-4 tracking-tighter uppercase">Intima-Care</h1>
-        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-zinc-900/50 rounded-full border border-zinc-800"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span><span className="text-xs font-mono text-zinc-400 uppercase">Vault: {balance.toFixed(0)} INT</span></div>
+        <h1 className="text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent mb-4 tracking-tighter uppercase italic">Intima-Care</h1>
+        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-md">
+           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+           <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Vault: {balance.toFixed(0)} INT</span>
+        </div>
       </header>
+
+      {/* 3D TAB SYSTEM */}
       <div className="flex justify-center gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
         {['Doctors', 'Destinations', 'Diagnostics'].map((tab) => (
-          <button key={tab} onClick={() => { setActiveTab(tab as any); setSelectedProvider(null); }} className={`px-8 py-3 rounded-2xl text-xs font-black transition-all border-2 whitespace-nowrap ${activeTab === tab ? "bg-white text-black border-white scale-105 shadow-xl" : "bg-zinc-900 text-zinc-500 border-zinc-800"}`}>{tab.toUpperCase()}</button>
+          <button 
+            key={tab} 
+            onClick={() => { setActiveTab(tab as any); setSelectedProvider(null); }} 
+            className={`px-8 py-3 rounded-2xl text-xs font-black transition-all border-2 whitespace-nowrap ${activeTab === tab ? "bg-white text-black border-white scale-105 shadow-xl" : "bg-zinc-900 text-zinc-500 border-zinc-800"}`}
+          >
+            {tab.toUpperCase()}
+          </button>
         ))}
       </div>
+
+      {/* VERTICAL GRID - FIXED TYPE SCRIPT ERRORS FOR VERCEL */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-        {getActiveData().map((item) => (
-          <div key={item.id} onClick={() => handleOpen(item)} className="group relative bg-zinc-900/30 border border-zinc-800 rounded-3xl p-6 hover:border-zinc-500 transition-all cursor-pointer overflow-hidden"><div className="absolute top-0 right-0 p-4 opacity-5 text-6xl">{item.image}</div><div className="flex items-start gap-5"><div className="text-4xl shrink-0">{item.image}</div><div className="flex-1"><h3 className="text-xl font-bold mb-1">{item.name}</h3><p className="text-zinc-500 text-xs mb-3">{item.org}</p><div className="flex items-center gap-2 flex-wrap"><span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded uppercase tracking-widest">{item.role}</span>{item.distance && <span className="text-[10px] text-blue-400 font-mono">📍 {item.distance}</span>}</div></div><div className="text-right shrink-0"><div className="text-xl font-black text-white">{item.price}</div><div className="text-[10px] text-zinc-600 uppercase font-bold">{activeTab === 'Destinations' ? 'per night' : 'fixed fee'}</div></div></div></div>
+        {getActiveData().map((item: any) => (
+          <div 
+            key={item.id} 
+            onClick={() => handleOpen(item)} 
+            className="group relative bg-zinc-900/30 border border-zinc-800 rounded-3xl p-6 hover:border-zinc-500 transition-all cursor-pointer overflow-hidden backdrop-blur-sm"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-6xl pointer-events-none">{item.image}</div>
+            <div className="flex items-start gap-5">
+              <div className="text-4xl shrink-0">{item.image}</div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">{item.name}</h3>
+                <p className="text-zinc-500 text-xs mb-3">{item.org}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded uppercase tracking-widest">{item.role}</span>
+                  {/* FIX FOR TS2339: item typed as 'any' to allow distance access on diagnostic labs */}
+                  {item.distance && <span className="text-[10px] text-blue-400 font-mono">📍 {item.distance}</span>}
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-xl font-black text-white">{item.price}</div>
+                <div className="text-[10px] text-zinc-600 uppercase font-bold tracking-tighter">
+                  {activeTab === 'Destinations' ? 'per night' : 'fixed fee'}
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
+
+      {/* MODAL SYSTEM */}
       {selectedProvider && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl relative">
+          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl relative">
             <button onClick={() => setSelectedProvider(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white text-xl z-50">✕</button>
+            
             {viewState === 'profile' && (
               <div className="p-10">
-                <div className="flex items-center gap-6 mb-8"><div className="text-6xl">{selectedProvider.image}</div><div><h2 className="text-3xl font-black tracking-tight">{selectedProvider.name}</h2><p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">{selectedProvider.type}</p></div></div>
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="text-6xl">{selectedProvider.image}</div>
+                  <div>
+                    <h2 className="text-3xl font-black tracking-tight">{selectedProvider.name}</h2>
+                    <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">{selectedProvider.type}</p>
+                  </div>
+                </div>
                 <p className="text-zinc-400 text-sm leading-relaxed mb-10">{selectedProvider.bio}</p>
-                <div className="flex flex-wrap gap-2 mb-10">{selectedProvider.tags.map((tag: string) => (<span key={tag} className="text-[10px] bg-zinc-800 text-zinc-500 px-3 py-1 rounded-full uppercase font-bold border border-zinc-700">{tag}</span>))}</div>
-                <button onClick={() => setViewState('booking')} className="w-full bg-white text-black py-5 rounded-3xl font-black text-lg hover:bg-zinc-200 transition-all">START SECURE BOOKING</button>
+                <div className="flex flex-wrap gap-2 mb-10">
+                  {selectedProvider.tags.map((tag: string) => (
+                    <span key={tag} className="text-[10px] bg-zinc-800 text-zinc-500 px-3 py-1 rounded-full uppercase font-bold border border-zinc-700">{tag}</span>
+                  ))}
+                </div>
+                <button onClick={() => setViewState('booking')} className="w-full bg-white text-black py-5 rounded-3xl font-black text-lg hover:bg-zinc-200 transition-all active:scale-95 shadow-xl">START SECURE BOOKING</button>
               </div>
             )}
+
             {viewState === 'booking' && (
               <div className="p-10">
                 <h3 className="text-2xl font-black mb-8 text-center uppercase tracking-tighter">Settlement Config</h3>
                 {activeTab === 'Destinations' ? (
-                  <div className="space-y-6"><p className="text-xs text-zinc-500 uppercase text-center font-bold tracking-widest">Stay Duration (Nights)</p><div className="flex items-center justify-between bg-black/50 p-6 rounded-3xl border border-zinc-800"><button onClick={() => setStayDuration(Math.max(1, stayDuration - 1))} className="w-12 h-12 bg-zinc-800 rounded-full text-2xl font-bold">-</button><span className="text-4xl font-black font-mono">{stayDuration}</span><button onClick={() => setStayDuration(stayDuration + 1)} className="w-12 h-12 bg-zinc-800 rounded-full text-2xl font-bold">+</button></div></div>
+                  <div className="space-y-6">
+                    <p className="text-xs text-zinc-500 uppercase text-center font-bold tracking-widest">Stay Duration (Nights)</p>
+                    <div className="flex items-center justify-between bg-black/50 p-6 rounded-3xl border border-zinc-800">
+                      <button onClick={() => setStayDuration(Math.max(1, stayDuration - 1))} className="w-12 h-12 bg-zinc-800 rounded-full text-2xl font-bold transition-all hover:bg-zinc-700">-</button>
+                      <span className="text-4xl font-black font-mono">{stayDuration}</span>
+                      <button onClick={() => setStayDuration(stayDuration + 1)} className="w-12 h-12 bg-zinc-800 rounded-full text-2xl font-bold transition-all hover:bg-zinc-700">+</button>
+                    </div>
+                  </div>
                 ) : (
-                  <div className="bg-black/50 p-8 rounded-3xl border border-dashed border-zinc-800 text-center"><p className="text-zinc-400 text-sm italic">Standard Zero-Data Voucher Protocol Active.</p></div>
+                  <div className="bg-black/50 p-8 rounded-3xl border border-dashed border-zinc-800 text-center">
+                    <p className="text-zinc-400 text-sm italic">Standard Zero-Data Voucher Protocol Active.</p>
+                  </div>
                 )}
-                <div className="mt-10 pt-8 border-t border-zinc-800"><div className="flex justify-between items-center mb-6"><span className="text-zinc-500 font-bold uppercase text-xs">Final Total</span><span className="text-3xl font-black text-white font-mono">{calculateTotal()} INT</span></div><button onClick={executeOrder} className="w-full bg-blue-600 text-white py-5 rounded-3xl font-black text-lg uppercase shadow-xl transition-all">Authorize Payment</button></div>
+                <div className="mt-10 pt-8 border-t border-zinc-800">
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-zinc-500 font-bold uppercase text-xs">Final Total</span>
+                    <span className="text-3xl font-black text-white font-mono">{calculateTotal()} INT</span>
+                  </div>
+                  <button onClick={executeOrder} className="w-full bg-blue-600 text-white py-5 rounded-3xl font-black text-lg uppercase shadow-xl transition-all active:scale-95">Authorize Payment</button>
+                </div>
               </div>
             )}
+
             {viewState === 'success' && (
               <div className="p-10 text-center animate-in zoom-in-95 duration-500 h-full overflow-y-auto max-h-[85vh] no-scrollbar">
-                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">✓</div>
-                <h3 className="text-2xl font-black mb-2 uppercase">Settlement Complete</h3>
-                <p className="text-zinc-500 text-[10px] mb-8 leading-relaxed uppercase tracking-widest">Intima Hub has settled your bill. Present this digital ID at the destination.</p>
-                <div className="bg-white p-6 rounded-3xl mb-8 flex flex-col items-center">
-                  <div className="w-44 h-44 bg-zinc-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden"><div className="grid grid-cols-6 gap-1 p-4 opacity-80">{Array.from({ length: 36 }).map((_, i) => (<div key={i} className={`w-6 h-6 rounded-sm ${Math.random() > 0.5 ? 'bg-black' : 'bg-transparent'}`}></div>))}</div><div className="absolute inset-0 border-[10px] border-white"></div></div>
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1">Secure Voucher ID</p><p className="text-xl text-black font-black font-mono tracking-[0.2em]">{generatedId}</p>
+                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-green-900/20">✓</div>
+                <h3 className="text-2xl font-black mb-2 uppercase tracking-tighter">Settlement Complete</h3>
+                <p className="text-zinc-500 text-[10px] mb-8 leading-relaxed uppercase tracking-widest">Intima Hub has settled your bill. Present this digital identifier at the destination.</p>
+                <div className="bg-white p-6 rounded-3xl mb-8 flex flex-col items-center shadow-xl">
+                  <div className="w-44 h-44 bg-zinc-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
+                    <div className="grid grid-cols-6 gap-1 p-4 opacity-80">
+                      {Array.from({ length: 36 }).map((_, i) => (
+                        <div key={i} className={`w-6 h-6 rounded-sm ${Math.random() > 0.5 ? 'bg-black' : 'bg-transparent'}`}></div>
+                      ))}
+                    </div>
+                    <div className="absolute inset-0 border-[10px] border-white pointer-events-none"></div>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1 tracking-widest">Secure Voucher ID</p>
+                  <p className="text-xl text-black font-black font-mono tracking-[0.2em]">{generatedId}</p>
                 </div>
-                <button onClick={() => { setSelectedProvider(null); setViewState('profile'); }} className="w-full py-4 bg-zinc-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-colors">Acknowledge</button>
+                <button onClick={() => { setSelectedProvider(null); setViewState('profile'); }} className="w-full py-4 bg-zinc-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-colors hover:bg-zinc-700">Acknowledge</button>
               </div>
             )}
           </div>
