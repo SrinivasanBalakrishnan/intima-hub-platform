@@ -85,8 +85,8 @@ export default function SplashScreen() {
               <Image src="/logo.jpg" alt="Intima Hub" width={96} height={96} className="object-cover opacity-90 group-hover:scale-110 transition-transform duration-700" />
             </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 mb-3 drop-shadow-sm">INTIMA</h1>
-          <p className="text-purple-200/60 font-mono text-xs uppercase tracking-[0.3em]">Privacy-Native Operating System</p>
+          <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 mb-3 drop-shadow-sm">INTIMA HUB</h1>
+          <p className="text-purple-200/60 font-mono text-xs uppercase tracking-[0.3em]">Privacy-Native Operating System for Intimate Health & Wellness</p>
         </div>
 
         {/* INTERACTION AREA */}
