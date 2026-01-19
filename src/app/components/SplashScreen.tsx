@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-// FIX: Correct import path relative to 'src/app/components'
 import { useIntima } from "../context/IntimaContext";
 
 // --- INTERNAL UTILS ---
@@ -69,11 +68,11 @@ export default function SplashScreen() {
           <div className="relative w-24 h-24 mx-auto mb-6 group">
             <div className="absolute inset-0 bg-purple-500 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 animate-pulse-slow"></div>
             <div className="relative w-full h-full bg-black/50 rounded-full border border-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-2xl">
-              <Image src="/logo.jpg" alt="Intima" width={96} height={96} className="object-cover opacity-90 group-hover:scale-110 transition-transform duration-700" />
+              <Image src="/logo.jpg" alt="Intima Hub" width={96} height={96} className="object-cover opacity-90 group-hover:scale-110 transition-transform duration-700" />
             </div>
           </div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 mb-3 drop-shadow-sm">INTIMA</h1>
-          <p className="text-purple-200/60 font-mono text-xs uppercase tracking-[0.3em]">The Privacy-Native OS</p>
+          <p className="text-purple-200/60 font-mono text-xs uppercase tracking-[0.3em]">The Privacy-Native Operating System for Intimate Health & wellness</p>
         </div>
 
         {/* INTERACTION AREA */}
@@ -82,10 +81,10 @@ export default function SplashScreen() {
           {mode === 'intro' && (
             <div className="p-4 space-y-4 animate-in fade-in zoom-in-95 duration-500">
               <button onClick={handleGenerate} className="w-full relative group/btn overflow-hidden rounded-xl bg-white text-black py-4 font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98]">
-                <span className="relative z-10 flex items-center justify-center gap-2">Initialize Identity <span className="text-xs opacity-50">→</span></span>
+                <span className="relative z-10 flex items-center justify-center gap-2">New Id<span className="text-xs opacity-50">→</span></span>
               </button>
               <button onClick={() => setMode('restoring')} className="w-full py-4 rounded-xl text-gray-400 font-medium text-sm hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2">
-                <span className="opacity-50">🔑</span> Restore Existing Key
+                <span className="opacity-50">🔑</span> Unlock by Existing Key
               </button>
             </div>
           )}
