@@ -1,9 +1,10 @@
+// FORCE_DEPLOY_TRIGGER_01
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; 
-// FIX: Up one level (..) to find context in 'app'
+// TESTER NOTE: Use '../' to go up from 'pay' to 'src/app', then to 'context'
 import { useIntima } from "../context/IntimaContext";
 
 export default function PayPage() {

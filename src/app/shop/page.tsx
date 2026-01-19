@@ -1,8 +1,9 @@
+// FORCE_DEPLOY_TRIGGER_01
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-// FIX: Up one level (..) to find context in 'app'
+// TESTER NOTE: Use '../' to go up from 'shop' to 'src/app', then to 'context'
 import { useIntima } from "../context/IntimaContext";
 
 // --- MOCK PRODUCT DATABASE (UPDATED TO INT PRICING) ---

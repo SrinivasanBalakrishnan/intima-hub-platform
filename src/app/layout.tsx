@@ -1,9 +1,10 @@
+// FORCE_DEPLOY_TRIGGER_01
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// FIX: Changed './' to '../' (Go UP one level to find 'context' in 'src')
-import { IntimaProvider } from "../context/IntimaContext";
+// TESTER NOTE: Use './' because 'context' is a folder inside 'src/app' (neighbor to layout.tsx)
+import { IntimaProvider } from "./context/IntimaContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

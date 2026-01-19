@@ -1,8 +1,10 @@
+// FORCE_DEPLOY_TRIGGER_01
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { useIntima } from "../../context/IntimaContext";
+// TESTER NOTE: Use '../' to go up one level from 'care' to 'src/app'
+import { useIntima } from "../context/IntimaContext";
 
 // --- MOCK DATABASE (Enhanced with Bio & Stats & Numeric Pricing) ---
 const DOCTORS = [
@@ -236,8 +238,8 @@ export default function CarePage() {
               <div className="flex flex-col h-full overflow-y-auto custom-scrollbar">
                 {/* Header Image */}
                 <div className="h-32 bg-gradient-to-r from-green-900/40 to-teal-900/40 shrink-0 relative">
-                   <div className="absolute -bottom-10 left-6 w-24 h-24 bg-zinc-800 rounded-full border-4 border-zinc-900 flex items-center justify-center text-5xl shadow-xl">
-                    {selectedDoctor.image}
+                    <div className="absolute -bottom-10 left-6 w-24 h-24 bg-zinc-800 rounded-full border-4 border-zinc-900 flex items-center justify-center text-5xl shadow-xl">
+                     {selectedDoctor.image}
                   </div>
                 </div>
 

@@ -1,10 +1,17 @@
+// FORCE_DEPLOY_TRIGGER_01
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+// TESTER NOTE: Connecting to Global Context via correct relative path
+import { useIntima } from "../context/IntimaContext";
+import Link from "next/link"; // Better than window.location for internal nav
 
 export default function BotPage() {
+  // CONNECT TO GLOBAL STATE (Even if just for UserID/Session)
+  const { userId } = useIntima();
+
   const [messages, setMessages] = useState([
-    { role: "bot", content: "Hello. I am Intima-Bot. How can I assist with your wellness today?" }
+    { role: "bot", content: `Hello ${userId}. I am Intima-Bot. How can I assist with your wellness today?` }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +20,7 @@ export default function BotPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
     const userMessage = { role: "user", content: input };
@@ -38,13 +46,13 @@ export default function BotPage() {
   return (
     <div className="flex flex-col h-screen bg-black text-gray-100 font-sans relative">
       
-      {/* --- THE BACK BUTTON (Styled & Functional) --- */}
-      <button
-        onClick={() => window.location.href = '/'}
+      {/* --- THE BACK BUTTON (Using Next/Link for smoother nav) --- */}
+      <Link
+        href="/"
         className="fixed top-5 left-5 z-[9999] group bg-zinc-900/80 backdrop-blur-md border border-zinc-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 hover:text-white hover:border-blue-500 transition-all shadow-lg flex items-center gap-2"
       >
         <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Hub
-      </button>
+      </Link>
       {/* --------------------------------------------- */}
 
       {/* HEADER */}
