@@ -1,11 +1,18 @@
-// FORCE_DEPLOY_TRIGGER_3D_OMNIBUS_PRODUCTION_FINAL
+// FORCE_DEPLOY_TRIGGER_3D_TRI_COLOR_PRODUCTION_READY
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { useIntima } from "../context/IntimaContext";
 
-// --- 3D VERTICAL DATASETS (FULL REGISTRY) ---
+// --- THEME CONFIGURATION ---
+const THEMES = {
+  Doctors: { color: "blue", hex: "#2563EB", text: "text-blue-400", bg: "bg-blue-600", border: "border-blue-500/50", glow: "from-blue-900/20" },
+  Destinations: { color: "purple", hex: "#7C3AED", text: "text-purple-400", bg: "bg-purple-600", border: "border-purple-500/50", glow: "from-purple-900/20" },
+  Diagnostics: { color: "green", hex: "#16A34A", text: "text-green-400", bg: "bg-green-600", border: "border-green-500/50", glow: "from-green-900/20" }
+};
+
+// --- DATASETS ---
 const DOCTORS = [
   { id: 1, name: "Dr. A. Sharma", role: "Specialist", org: "Apollo Spectra", type: "Doctor", category: "Physical", image: "👨‍⚕️", price: 500, rating: 4.9, bio: "Certified Sexual Health Specialist with 12+ years experience.", tags: ["Verified", "Secure-Consult"] },
   { id: 2, name: "Dr. Sarah J.", role: "Psychologist", org: "Mindful Space", type: "Doctor", category: "Mental", image: "👩‍⚕️", price: 650, rating: 5.0, bio: "Expert in intimacy and relationship wellness coaching.", tags: ["Therapy", "LGBTQ+ Friendly"] },
@@ -38,6 +45,8 @@ export default function CarePage() {
   const [stayDuration, setStayDuration] = useState(1);
   const [generatedId, setGeneratedId] = useState("");
 
+  const currentTheme = THEMES[activeTab];
+
   const getActiveData = () => {
     if (activeTab === 'Doctors') return DOCTORS;
     if (activeTab === 'Destinations') return DESTINATIONS;
@@ -50,75 +59,73 @@ export default function CarePage() {
     setStayDuration(1);
   };
 
-  const calculateTotal = () => {
-    if (!selectedProvider) return 0;
-    return activeTab === 'Destinations' ? selectedProvider.price * stayDuration : selectedProvider.price;
-  };
-
   const executeOrder = () => {
-    const total = calculateTotal();
-    if (balance < total) {
-      alert("Insufficient INT Liquidity. Redirecting to Vault...");
-      window.location.href = "/pay";
-      return;
-    }
+    const total = activeTab === 'Destinations' ? selectedProvider.price * stayDuration : selectedProvider.price;
+    if (balance < total) { alert("Insufficient INT Liquidity. Redirecting to Vault..."); window.location.href = "/pay"; return; }
+    
     const prefix = activeTab === 'Doctors' ? 'SEC' : activeTab === 'Destinations' ? 'VLT' : 'LAB';
     const newId = `${prefix}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
     setGeneratedId(newId);
+
     addTransaction(`${activeTab}: ${selectedProvider.name}`, total, 'debit');
     setViewState('success');
   };
 
   return (
-    <div className="min-h-screen bg-black text-gray-100 font-sans p-6 pb-32">
-      <Link href="/" className="fixed top-5 left-5 z-[50] bg-zinc-900/90 border border-zinc-800 px-4 py-2 rounded-full text-xs font-bold hover:border-blue-500 transition-all shadow-xl">← HUB</Link>
+    <div className="min-h-screen bg-black text-white font-sans p-6 pb-32 relative overflow-hidden transition-colors duration-700">
       
-      <header className="mt-16 mb-12 text-center">
-        <h1 className="text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent mb-4 tracking-tighter uppercase italic">Intima-Care</h1>
-        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-md">
-           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-           <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Vault: {balance.toFixed(0)} INT</span>
+      {/* DYNAMIC ATMOSPHERE BACKGROUND */}
+      <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] ${currentTheme.glow} via-black to-black transition-all duration-1000`}></div>
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+
+      <Link href="/" className="fixed top-5 left-5 z-[50] bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-full text-xs font-bold hover:border-white transition-all shadow-xl">← HUB</Link>
+      
+      <header className="relative z-10 mt-16 mb-12 text-center">
+        <h1 className="text-6xl font-black tracking-tighter uppercase italic mb-4">Intima-Care</h1>
+        <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
+           <span className={`w-2 h-2 rounded-full animate-pulse ${currentTheme.bg}`}></span>
+           <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest tracking-[0.2em]">Vault: {balance.toFixed(0)} INT</span>
         </div>
       </header>
 
       {/* 3D TAB SYSTEM */}
-      <div className="flex justify-center gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
-        {['Doctors', 'Destinations', 'Diagnostics'].map((tab) => (
-          <button 
-            key={tab} 
-            onClick={() => { setActiveTab(tab as any); setSelectedProvider(null); }} 
-            className={`px-8 py-3 rounded-2xl text-xs font-black transition-all border-2 whitespace-nowrap ${activeTab === tab ? "bg-white text-black border-white scale-105 shadow-xl" : "bg-zinc-900 text-zinc-500 border-zinc-800"}`}
+      <div className="relative z-10 flex justify-center gap-3 mb-16 overflow-x-auto pb-4 no-scrollbar">
+        {(['Doctors', 'Destinations', 'Diagnostics'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => { setActiveTab(tab); setSelectedProvider(null); }}
+            className={`px-8 py-3 rounded-2xl text-[10px] font-black tracking-widest transition-all border-2 whitespace-nowrap ${
+              activeTab === tab 
+              ? `${THEMES[tab].bg} text-white border-transparent scale-110 shadow-2xl` 
+              : "bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:text-zinc-300"
+            }`}
           >
             {tab.toUpperCase()}
           </button>
         ))}
       </div>
 
-      {/* VERTICAL GRID - FIXED TYPE SCRIPT ERRORS FOR VERCEL */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      {/* VERTICAL GRID - FIXED FOR VERCEL (Line 91 assertion) */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
         {getActiveData().map((item: any) => (
           <div 
             key={item.id} 
             onClick={() => handleOpen(item)} 
-            className="group relative bg-zinc-900/30 border border-zinc-800 rounded-3xl p-6 hover:border-zinc-500 transition-all cursor-pointer overflow-hidden backdrop-blur-sm"
+            className={`group relative bg-zinc-900/20 backdrop-blur-xl border ${currentTheme.border} rounded-[32px] p-8 hover:scale-[1.02] transition-all cursor-pointer overflow-hidden shadow-2xl`}
           >
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-6xl pointer-events-none">{item.image}</div>
-            <div className="flex items-start gap-5">
-              <div className="text-4xl shrink-0">{item.image}</div>
+            <div className="flex items-start gap-6">
+              <div className="text-5xl shrink-0 group-hover:rotate-12 transition-transform">{item.image}</div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-1 group-hover:text-white transition-colors">{item.name}</h3>
-                <p className="text-zinc-500 text-xs mb-3">{item.org}</p>
+                <h3 className="text-2xl font-black mb-1 group-hover:text-white transition-colors">{item.name}</h3>
+                <p className="text-zinc-500 text-xs mb-4 uppercase font-bold tracking-widest">{item.org}</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded uppercase tracking-widest">{item.role}</span>
-                  {/* FIX FOR TS2339: item typed as 'any' to allow distance access on diagnostic labs */}
-                  {item.distance && <span className="text-[10px] text-blue-400 font-mono">📍 {item.distance}</span>}
+                  <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter ${currentTheme.bg} text-white`}>{item.role}</span>
+                  {item.distance && <span className="text-[10px] text-zinc-400 font-mono">📍 {item.distance}</span>}
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="text-xl font-black text-white">{item.price}</div>
-                <div className="text-[10px] text-zinc-600 uppercase font-bold tracking-tighter">
-                  {activeTab === 'Destinations' ? 'per night' : 'fixed fee'}
-                </div>
+              <div className="text-right">
+                <div className={`text-2xl font-black ${currentTheme.text}`}>{item.price}</div>
+                <div className="text-[8px] text-zinc-600 uppercase font-black tracking-widest">{activeTab === 'Destinations' ? 'per night' : 'fixed'}</div>
               </div>
             </div>
           </div>
@@ -127,76 +134,58 @@ export default function CarePage() {
 
       {/* MODAL SYSTEM */}
       {selectedProvider && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl relative">
-            <button onClick={() => setSelectedProvider(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white text-xl z-50">✕</button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-in fade-in duration-500">
+          <div className={`bg-zinc-900 border ${currentTheme.border} w-full max-w-lg rounded-[48px] overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]`}>
+            <button onClick={() => setSelectedProvider(null)} className="absolute top-8 right-8 text-zinc-500 hover:text-white text-2xl z-50 transition-colors">✕</button>
             
-            {viewState === 'profile' && (
-              <div className="p-10">
-                <div className="flex items-center gap-6 mb-8">
-                  <div className="text-6xl">{selectedProvider.image}</div>
-                  <div>
-                    <h2 className="text-3xl font-black tracking-tight">{selectedProvider.name}</h2>
-                    <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">{selectedProvider.type}</p>
-                  </div>
+            <div className="overflow-y-auto no-scrollbar">
+              {viewState === 'profile' && (
+                <div className="p-12">
+                  <div className="text-7xl mb-8">{selectedProvider.image}</div>
+                  <h2 className="text-4xl font-black tracking-tighter mb-2">{selectedProvider.name}</h2>
+                  <p className={`font-mono text-xs uppercase tracking-[0.3em] mb-8 ${currentTheme.text}`}>{selectedProvider.type}</p>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-12">{selectedProvider.bio}</p>
+                  <button onClick={() => setViewState('booking')} className={`w-full ${currentTheme.bg} text-white py-6 rounded-3xl font-black text-xl hover:brightness-110 active:scale-95 transition-all shadow-2xl uppercase`}>Start Secure Booking</button>
                 </div>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-10">{selectedProvider.bio}</p>
-                <div className="flex flex-wrap gap-2 mb-10">
-                  {selectedProvider.tags.map((tag: string) => (
-                    <span key={tag} className="text-[10px] bg-zinc-800 text-zinc-500 px-3 py-1 rounded-full uppercase font-bold border border-zinc-700">{tag}</span>
-                  ))}
-                </div>
-                <button onClick={() => setViewState('booking')} className="w-full bg-white text-black py-5 rounded-3xl font-black text-lg hover:bg-zinc-200 transition-all active:scale-95 shadow-xl">START SECURE BOOKING</button>
-              </div>
-            )}
+              )}
 
-            {viewState === 'booking' && (
-              <div className="p-10">
-                <h3 className="text-2xl font-black mb-8 text-center uppercase tracking-tighter">Settlement Config</h3>
-                {activeTab === 'Destinations' ? (
-                  <div className="space-y-6">
-                    <p className="text-xs text-zinc-500 uppercase text-center font-bold tracking-widest">Stay Duration (Nights)</p>
-                    <div className="flex items-center justify-between bg-black/50 p-6 rounded-3xl border border-zinc-800">
-                      <button onClick={() => setStayDuration(Math.max(1, stayDuration - 1))} className="w-12 h-12 bg-zinc-800 rounded-full text-2xl font-bold transition-all hover:bg-zinc-700">-</button>
-                      <span className="text-4xl font-black font-mono">{stayDuration}</span>
-                      <button onClick={() => setStayDuration(stayDuration + 1)} className="w-12 h-12 bg-zinc-800 rounded-full text-2xl font-bold transition-all hover:bg-zinc-700">+</button>
+              {viewState === 'booking' && (
+                <div className="p-12 text-center">
+                  <h3 className="text-2xl font-black mb-12 uppercase tracking-tighter">Settlement Config</h3>
+                  {activeTab === 'Destinations' ? (
+                    <div className="bg-black/50 p-8 rounded-[32px] border border-zinc-800 flex justify-between items-center mb-12">
+                      <button onClick={() => setStayDuration(Math.max(1, stayDuration - 1))} className="w-14 h-14 bg-zinc-800 rounded-full text-3xl font-bold">-</button>
+                      <span className="text-5xl font-black font-mono">{stayDuration}</span>
+                      <button onClick={() => setStayDuration(stayDuration + 1)} className="w-14 h-14 bg-zinc-800 rounded-full text-3xl font-bold">+</button>
                     </div>
+                  ) : (
+                    <div className="bg-black/50 p-10 rounded-[32px] border border-dashed border-zinc-800 mb-12 italic text-zinc-500 text-sm">Standard Zero-Data Voucher Protocol Active.</div>
+                  )}
+                  <div className="flex justify-between items-center mb-10 px-4">
+                    <span className="text-zinc-500 font-bold uppercase text-xs">Total due</span>
+                    <span className={`text-4xl font-black font-mono ${currentTheme.text}`}>{activeTab === 'Destinations' ? selectedProvider.price * stayDuration : selectedProvider.price} INT</span>
                   </div>
-                ) : (
-                  <div className="bg-black/50 p-8 rounded-3xl border border-dashed border-zinc-800 text-center">
-                    <p className="text-zinc-400 text-sm italic">Standard Zero-Data Voucher Protocol Active.</p>
-                  </div>
-                )}
-                <div className="mt-10 pt-8 border-t border-zinc-800">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-zinc-500 font-bold uppercase text-xs">Final Total</span>
-                    <span className="text-3xl font-black text-white font-mono">{calculateTotal()} INT</span>
-                  </div>
-                  <button onClick={executeOrder} className="w-full bg-blue-600 text-white py-5 rounded-3xl font-black text-lg uppercase shadow-xl transition-all active:scale-95">Authorize Payment</button>
+                  <button onClick={executeOrder} className={`w-full ${currentTheme.bg} text-white py-6 rounded-3xl font-black text-xl active:scale-95 transition-all uppercase`}>Authorize Payment</button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {viewState === 'success' && (
-              <div className="p-10 text-center animate-in zoom-in-95 duration-500 h-full overflow-y-auto max-h-[85vh] no-scrollbar">
-                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-green-900/20">✓</div>
-                <h3 className="text-2xl font-black mb-2 uppercase tracking-tighter">Settlement Complete</h3>
-                <p className="text-zinc-500 text-[10px] mb-8 leading-relaxed uppercase tracking-widest">Intima Hub has settled your bill. Present this digital identifier at the destination.</p>
-                <div className="bg-white p-6 rounded-3xl mb-8 flex flex-col items-center shadow-xl">
-                  <div className="w-44 h-44 bg-zinc-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
-                    <div className="grid grid-cols-6 gap-1 p-4 opacity-80">
-                      {Array.from({ length: 36 }).map((_, i) => (
-                        <div key={i} className={`w-6 h-6 rounded-sm ${Math.random() > 0.5 ? 'bg-black' : 'bg-transparent'}`}></div>
-                      ))}
-                    </div>
-                    <div className="absolute inset-0 border-[10px] border-white pointer-events-none"></div>
+              {viewState === 'success' && (
+                <div className="p-12 text-center animate-in zoom-in-95 duration-500">
+                  <div className={`w-24 h-24 ${currentTheme.bg} rounded-full flex items-center justify-center text-5xl mx-auto mb-10 shadow-2xl`}>✓</div>
+                  <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase">Settlement Complete</h3>
+                  <div className="bg-white p-8 rounded-[40px] mb-10 shadow-2xl">
+                     <div className="w-40 h-40 bg-zinc-100 mx-auto mb-6 rounded-3xl grid grid-cols-5 gap-1 p-4 opacity-50">
+                        {Array.from({length: 25}).map((_, i) => (
+                          <div key={i} className={`w-full h-full ${Math.random() > 0.5 ? 'bg-black' : ''}`}></div>
+                        ))}
+                     </div>
+                     <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mb-1">Secure Voucher ID</p>
+                     <p className="text-2xl text-black font-black font-mono tracking-widest">{generatedId}</p>
                   </div>
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1 tracking-widest">Secure Voucher ID</p>
-                  <p className="text-xl text-black font-black font-mono tracking-[0.2em]">{generatedId}</p>
+                  <button onClick={() => setSelectedProvider(null)} className="text-xs text-zinc-500 hover:text-white uppercase font-black tracking-widest transition-colors">Close Vault</button>
                 </div>
-                <button onClick={() => { setSelectedProvider(null); setViewState('profile'); }} className="w-full py-4 bg-zinc-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-colors hover:bg-zinc-700">Acknowledge</button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
